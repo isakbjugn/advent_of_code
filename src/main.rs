@@ -7,12 +7,13 @@ mod december_1;
 
 fn main() {
     let day = args().nth(1).unwrap();
-    let path = format!("input/input_{}", day);
+    let path = format!("input/input_{}.txt", day);
     let input = read_to_string(path).unwrap();
 
     match day.as_str() {
         "1" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_1::part_1(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_1::part_2(&input));
         }
         _ => ()
     }
