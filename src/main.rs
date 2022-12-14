@@ -1,3 +1,19 @@
+use std::{
+    env::args,
+    fs::read_to_string
+};
+
+mod december_1;
+
 fn main() {
-    println!("Hello, world!");
+    let day = args().nth(1).unwrap();
+    let path = format!("input/input_{}", day);
+    let input = read_to_string(path).unwrap();
+
+    match day.as_str() {
+        "1" => {
+            println!("{}. desember, del 1: {}", day.as_str(), december_1::part_1(&input));
+        }
+        _ => ()
+    }
 }
