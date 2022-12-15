@@ -6,6 +6,7 @@ use std::{
 mod december_1;
 mod december_2;
 mod december_3;
+mod december_4;
 
 fn main() {
     let day = args().nth(1).unwrap();
@@ -24,6 +25,10 @@ fn main() {
         "3" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_3::part_1(&input));
             println!("{}. desember, del 2: {}", day.as_str(), december_3::part_2(&input));
+        }
+        "4" => {
+            println!("{}. desember, del 1: {}", day.as_str(), december_4::part_1(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_4::part_2(&input));
         }
         _ => ()
     }
