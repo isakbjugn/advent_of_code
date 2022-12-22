@@ -61,10 +61,10 @@ pub fn part_1(input: &str) -> u32 {
     //println!("{:#?}", root.borrow());
     let mut dir_sizes: Vec<(String, u32)> = Vec::new();
     root.borrow().register_dir_sizes(&mut dir_sizes);
-    //println!("{:#?}", dir_sizes);
-    let dir_sizes_up_to_100000: Vec<(String, u32)> = dir_sizes.into_iter().filter(|(_, val)| *val <= 100000).collect();
-    //println!("{:#?}", dir_sizes_up_to_100000);
-    dir_sizes_up_to_100000.into_iter().map(|(_, val)| val).collect::<Vec<u32>>().iter().sum()
+
+    const MAX_DIR_SIZE: u32 = 100000;
+    let small_dirs = dir_sizes.into_iter().filter(|(_, val)| *val <= MAX_DIR_SIZE);
+    small_dirs.into_iter().map(|(_, val)| val).collect::<Vec<u32>>().iter().sum()
 }
 
 fn init_tree(input: &str) -> Rc<RefCell<TreeNode>> {
@@ -110,8 +110,26 @@ fn init_tree(input: &str) -> Rc<RefCell<TreeNode>> {
     root
 }
 
+pub fn part_2(input: &str) -> u32 {
+    let root = init_tree(input);
+    //println!("{:#?}", root.borrow());
+    let mut dir_sizes: Vec<(String, u32)> = Vec::new();
+    root.borrow().register_dir_sizes(&mut dir_sizes);
+
+    let min_dir_size: u32 = root.borrow().get_content_size() - 40000000;
+    let large_dirs = dir_sizes.into_iter().filter(|(_, val)| *val >= min_dir_size);
+    let large_dir_sizes = large_dirs.into_iter().map(|(_, val)| val);
+    large_dir_sizes.into_iter().min().unwrap()
+}
+
 #[test]
 fn sample_input_part_1() {
     let input = include_str!("../input/sample_7.txt");
     assert_eq!(part_1(input), 95437)
+}
+
+#[test]
+fn sample_input_part_2() {
+    let input = include_str!("../input/sample_7.txt");
+    assert_eq!(part_2(input), 24933642)
 }
