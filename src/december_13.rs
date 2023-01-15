@@ -20,7 +20,18 @@ pub fn part_1(input: &str) -> u32 {
 }
 
 pub fn part_2(_input: &str) -> u32 {
-    2
+    let mut packets = Vec::new();
+    for line in _input.lines() {
+        if line.is_empty() { continue }
+        packets.push(line);
+    }
+    packets.push("[[2]]");
+    packets.push("[[6]]");
+    packets.sort_by(|&a, &b| compare(a, b, ""));
+
+    let index_2 = packets.iter().position(|&x| x == "[[2]]").unwrap() as u32;
+    let index_6 = packets.iter().position(|&x| x == "[[6]]").unwrap() as u32;
+    (index_2 + 1) * (index_6 + 1)
 }
 
 fn compare(left: &str, right: &str, indent: &str) -> Ordering {
@@ -161,5 +172,5 @@ fn real_input_part_1_3() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_13.txt");
-    assert_eq!(part_2(input), 2)
+    assert_eq!(part_2(input), 140)
 }
