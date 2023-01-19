@@ -19,9 +19,9 @@ pub fn part_1(input: &str) -> u32 {
     pair_index_sum
 }
 
-pub fn part_2(_input: &str) -> u32 {
+pub fn part_2(input: &str) -> u32 {
     let mut packets = Vec::new();
-    for line in _input.lines() {
+    for line in input.lines() {
         if line.is_empty() { continue }
         packets.push(line);
     }
