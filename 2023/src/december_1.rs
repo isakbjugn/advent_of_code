@@ -1,77 +1,84 @@
-pub fn part_1(input: &str) -> i32 {
+
+pub fn part_1(input: &str) -> i16 {
     input
         .lines()
-        .map(|line| line.chars().filter(|c| c.is_digit(10)))
-        .map(|chars| chars.clone().next().unwrap().to_string() + &chars.clone().last().unwrap().to_string())
-        .map(|s| s.parse::<i32>().unwrap())
+        .map(|line| line.filter_digits())
+        .map(|line| line.as_str().to_int_from_first_and_last())
         .sum()
 }
 
-pub fn part_2(input: &str) -> i32 {
+pub fn part_2(input: &str) -> i16 {
     input
         .lines()
-        .map(|line| line.to_two_digit_string().parse::<i32>().unwrap())
+        .map(|line| line.replace_written_numbers_with_digits())
+        .map(|line| line.as_str().filter_digits())
+        .map(|line| line.as_str().to_int_from_first_and_last())
         .sum()
 }
 
 trait CalibrationString {
-    fn to_two_digit_string(&self) -> String;
-    fn index_of_first_number(&self) -> Option<(&str, usize)>;
-    fn index_of_last_number(&self) -> Option<(&str, usize)>;
+    fn filter_digits(&self) -> String;
+    fn replace_written_numbers_with_digits(&self) -> String;
+    fn value_and_index_of_first_number(&self) -> Option<(char, usize)>;
+    fn value_and_index_of_last_number(&self) -> Option<(char, usize)>;
+    fn to_int_from_first_and_last(&self) -> i16;
 }
 
 impl CalibrationString for &str {
-
-    fn to_two_digit_string(&self) -> String {
-        let mut working_string;
-        working_string = match self.index_of_first_number() {
-            Some(("one", index)) => replace_char_at_index(self, index, '1'),
-            Some(("two", index)) => replace_char_at_index(self, index, '2'),
-            Some(("three", index)) => replace_char_at_index(self, index, '3'),
-            Some(("four", index)) => replace_char_at_index(self, index, '4'),
-            Some(("five", index)) => replace_char_at_index(self, index, '5'),
-            Some(("six", index)) => replace_char_at_index(self, index, '6'),
-            Some(("seven", index)) => replace_char_at_index(self, index, '7'),
-            Some(("eight", index)) => replace_char_at_index(self, index, '8'),
-            Some(("nine", index)) => replace_char_at_index(self, index, '9'),
-            _ => self.to_string()
-        };
-        working_string = match self.index_of_last_number() {
-            Some(("one", index)) => replace_char_at_index(working_string.as_str(), index, '1'),
-            Some(("two", index)) => replace_char_at_index(working_string.as_str(), index, '2'),
-            Some(("three", index)) => replace_char_at_index(working_string.as_str(), index, '3'),
-            Some(("four", index)) => replace_char_at_index(working_string.as_str(), index, '4'),
-            Some(("five", index)) => replace_char_at_index(working_string.as_str(), index, '5'),
-            Some(("six", index)) => replace_char_at_index(working_string.as_str(), index, '6'),
-            Some(("seven", index)) => replace_char_at_index(working_string.as_str(), index, '7'),
-            Some(("eight", index)) => replace_char_at_index(working_string.as_str(), index, '8'),
-            Some(("nine", index)) => replace_char_at_index(working_string.as_str(), index, '9'),
-            _ => working_string
-        };
-
-        let digits = working_string
-            .chars()
+    fn filter_digits(&self) -> String {
+        self.chars()
             .filter(|c| c.is_ascii_digit())
-            .collect::<Vec<char>>();
-
-        digits.first().unwrap().to_string() + &digits.last().unwrap().to_string()
+            .collect::<String>()
     }
+    fn replace_written_numbers_with_digits(&self) -> String {
+        let mut working_string = self.to_string();
+        if let Some((number, index)) = self.value_and_index_of_first_number() {
+            working_string = replace_char_at_index(self, index, number);
+        }
 
-    fn index_of_first_number(&self) -> Option<(&str, usize)> {
-        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
-            .into_iter()
-            .filter_map(|number| {
-                self.find(number).map(|index| (number, index))
-            })
-            .min_by_key(|&(_, index)| index)
+        if let Some((number, index)) = working_string.as_str().value_and_index_of_last_number() {
+            working_string = replace_char_at_index(working_string.as_str(), index, number);
+        }
+        working_string
     }
-    fn index_of_last_number(&self) -> Option<(&str, usize)> {
-        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+    fn value_and_index_of_first_number(&self) -> Option<(char, usize)> {
+        let number_array = [
+            "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+            "1", "2", "3", "4", "5", "6", "7", "8", "9"
+        ];
+
+        match number_array
             .into_iter()
-            .filter_map(|number| {
-                self.rfind(number).map(|index| (number, index))
+            .enumerate()
+            .filter_map(|(number_idx, number)| {
+                self.find(number).map(|index| (number_idx, index))
             })
-            .max_by_key(|&(_, index)| index)
+            .min_by_key(|&(_, index)| index) {
+            Some((number, index)) if number < 9 => Some((number_array.get(number + 9).unwrap().parse().unwrap(), index)),
+            _ => None
+        }
+    }
+    fn value_and_index_of_last_number(&self) -> Option<(char, usize)> {
+        let number_array = [
+            "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+            "1", "2", "3", "4", "5", "6", "7", "8", "9"
+        ];
+
+        match number_array
+            .into_iter()
+            .enumerate()
+            .filter_map(|(number_idx, number)| {
+                self.rfind(number).map(|index| (number_idx, index))
+            })
+            .max_by_key(|&(_, index)| index) {
+            Some((number, index)) if number < 9 => Some((number_array.get(number + 9).unwrap().parse().unwrap(), index)),
+            _ => None
+        }
+    }
+    fn to_int_from_first_and_last(&self) -> i16 {
+        let first = self.chars().next().unwrap().to_digit(10).unwrap() as i16;
+        let last = self.chars().last().unwrap().to_digit(10).unwrap() as i16;
+        first * 10 + last
     }
 }
 
