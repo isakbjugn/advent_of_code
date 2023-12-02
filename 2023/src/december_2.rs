@@ -3,15 +3,18 @@ pub fn part_1(input: &str) -> i16 {
     const GREEN_LIMIT: i8 = 13;
     const BLUE_LIMIT: i8 = 14;
 
-    input.lines().map(|line| to_game_and_cubes(line))
+    input.lines().map(to_game_and_cubes)
         .map(|(game, cubes_str)| (game, to_max_cubes(cubes_str)))
         .filter(|(_, max_cubes)| max_cubes.0 <= RED_LIMIT && max_cubes.1 <= GREEN_LIMIT && max_cubes.2 <= BLUE_LIMIT)
         .map(|(game, _)| game as i16)
         .sum()
 }
 
-pub fn part_2(_input: &str) -> i16 {
-    0
+pub fn part_2(input: &str) -> i32 {
+    input.lines().map(to_game_and_cubes)
+        .map(|(_, cubes_str)| to_max_cubes(cubes_str))
+        .map(|(red, green, blue)| red as i32 * green as i32 * blue as i32)
+        .sum()
 }
 
 fn to_game_and_cubes(line: &str) -> (i8, &str) {
@@ -49,5 +52,5 @@ fn sample_input_part_1() {
 #[test]
 fn sample_input_part_2_1() {
     let input = include_str!("../input/sample_2.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 2286)
 }
