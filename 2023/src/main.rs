@@ -1,4 +1,5 @@
 mod december_1;
+mod december_2;
 
 use std::{
     env::args,
@@ -14,6 +15,10 @@ fn main() {
         "1" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_1::part_1(&input));
             println!("{}. desember, del 2: {}", day.as_str(), december_1::part_2(&input));
+        }
+        "2" => {
+            println!("{}. desember, del 1: {}", day.as_str(), december_2::part_1(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_2::part_2(&input));
         }
         _ => ()
     }
