@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use regex::Regex;
 
 pub fn part_1(input: &str) -> i32 {
@@ -13,9 +13,20 @@ pub fn part_1(input: &str) -> i32 {
 
 struct Part {
     value: i32,
-    x_start: usize,
-    x_end: usize,
+    x: usize,
     y: usize,
+}
+
+impl Part {
+    fn len(&self) -> usize {
+        self.value.ilog10() as usize
+    }
+    fn in_hitbox(&self, coordinate: &(usize, usize)) -> bool {
+        let x_start = if self.x > 0 { self.x - 1 } else { self.x };
+        let y_start = if self.y > 0 { self.y - 1 } else { self.y };
+        (x_start..=self.x +self.len()+1).contains(&coordinate.0)
+            && (y_start..=self.y+1).contains(&coordinate.1)
+    }
 }
 
 fn get_parts(input: &str) -> Vec<Part> {
@@ -25,8 +36,7 @@ fn get_parts(input: &str) -> Vec<Part> {
         Regex::new(r"\d+").unwrap().find_iter(line).for_each(|number| {
             numbers.push(Part {
                 value: number.as_str().parse::<i32>().unwrap(),
-                x_start: number.start(),
-                x_end: number.end(),
+                x: number.start(),
                 y
             });
         });
@@ -34,116 +44,63 @@ fn get_parts(input: &str) -> Vec<Part> {
     numbers
 }
 
-fn get_symbols(input: &str) -> HashSet<(usize, usize)> {
+#[derive(Eq, PartialEq, Hash)]
+struct Symbol {
+    value: char,
+    x: usize,
+    y: usize,
+}
+
+impl Symbol {
+    fn get_coordinate(&self) -> (usize, usize) {
+        (self.x, self.y)
+    }
+}
+
+fn get_symbols(input: &str) -> HashSet<Symbol> {
     let mut symbol_set = HashSet::new();
     for (y, line) in input.lines().enumerate() {
         for (x, symbol) in line.chars().enumerate() {
             if !symbol.is_ascii_digit() && symbol != '.' {
-                symbol_set.insert((x, y));
+                symbol_set.insert(Symbol { value: symbol, x, y });
             }
         }
     }
     symbol_set
 }
 
+fn get_gears(input: &str) -> HashSet<Symbol> {
+    get_symbols(input).into_iter().filter(|symbol| symbol.value == '*').collect()
+}
+
 pub fn part_2(input: &str) -> i32 {
-    let mut gears = get_gears(input);
+    let parts = get_parts(input);
 
-    for part in get_parts(input) {
-        for x in part.x_start..part.x_end {
-            if gears.is_neighboor_and_push((x, part.y), part.value) {
-                break
-            }
-        }
-    }
+    let gears: Vec<Vec<i32>> = get_gears(input)
+        .iter()
+        .map(|gear| Vec::from_iter(
+            parts
+                .iter()
+                .filter(|part| part.in_hitbox(&gear.get_coordinate()))
+                .map(|part| part.value)
+        ))
+        .collect();
 
-    gears.iter()
-        .filter(|(_, v)| v.len() == 2)
-        .map(|(_, v)| v.iter().product::<i32>()).sum()
+    gears
+        .iter()
+        .filter(|parts| parts.len() == 2)
+        .map(|parts| parts.iter().product::<i32>())
+        .sum()
 }
 
 trait Symbols {
     fn is_neighboor(&self, part: &Part) -> bool;
 }
 
-impl Symbols for HashSet<(usize, usize)> {
+impl Symbols for HashSet<Symbol> {
     fn is_neighboor(&self, part: &Part) -> bool {
-        let y = part.y;
-        for x in part.x_start..part.x_end {
-            if x > 0 {
-                if y > 0 && self.contains(&(x-1, y-1)) { return true; }
-                if self.contains(&(x-1, y)) { return true; }
-                if self.contains(&(x-1, y+1)) { return true; }
-            }
-            if y > 0 {
-                if self.contains(&(x, y-1)) { return true; }
-                if self.contains(&(x+1, y-1)) { return true; }
-            }
-            if self.contains(&(x+1, y)) { return true; }
-            if self.contains(&(x, y+1)) { return true; }
-            if self.contains(&(x+1, y+1)) { return true; }
-        }
-        false
+        self.iter().any(|symbol| part.in_hitbox(&symbol.get_coordinate()))
     }
-}
-
-trait Gears {
-    fn is_neighboor_and_push(&mut self, coordinate: (usize, usize), number: i32) -> bool;
-}
-
-impl Gears for HashMap<(usize, usize), Vec<i32>> {
-    fn is_neighboor_and_push(&mut self, coordinate: (usize, usize), number: i32) -> bool {
-        let (x, y) = coordinate;
-        if x > 0 {
-            if y > 0 && self.contains_key(&(x-1, y-1)) {
-                self.get_mut(&(x-1, y-1)).unwrap().push(number);
-                return true;
-            }
-            if self.contains_key(&(x-1, y)) {
-                self.get_mut(&(x-1, y)).unwrap().push(number);
-                return true;
-            }
-            if self.contains_key(&(x-1, y+1)) {
-                self.get_mut(&(x-1, y+1)).unwrap().push(number);
-                return true;
-            }
-        }
-        if y > 0 {
-            if self.contains_key(&(x, y-1)) {
-                self.get_mut(&(x, y-1)).unwrap().push(number);
-                return true;
-            }
-            if self.contains_key(&(x+1, y-1)) {
-                self.get_mut(&(x+1, y-1)).unwrap().push(number);
-                return true;
-            }
-        }
-        if self.contains_key(&(x+1, y)) {
-            self.get_mut(&(x+1, y)).unwrap().push(number);
-            return true;
-        }
-        if self.contains_key(&(x, y+1)) {
-            self.get_mut(&(x, y+1)).unwrap().push(number);
-            return true;
-        }
-        if self.contains_key(&(x+1, y+1)) {
-            self.get_mut(&(x+1, y+1)).unwrap().push(number);
-            return true;
-        }
-        false
-    }
-}
-
-fn get_gears(input: &str) -> HashMap<(usize, usize), Vec<i32>> {
-    let mut gear_set = HashMap::new();
-    for (y, line) in input.lines().enumerate() {
-        for (x, symbol) in line.chars().enumerate() {
-            if symbol == '*' {
-                gear_set.insert((x, y), Vec::new());
-            }
-        }
-    }
-    gear_set
 }
 
 #[test]
