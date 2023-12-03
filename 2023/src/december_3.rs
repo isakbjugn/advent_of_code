@@ -1,42 +1,51 @@
 use std::collections::{HashMap, HashSet};
+use regex::Regex;
 
 pub fn part_1(input: &str) -> i32 {
-    let symbol_set = symbol_coordinates(input);
-    let valid_coordinates_set = valid_part_coordinates(symbol_set);
-    let mut sum: i32 = 0;
-    let mut prev_was_number = false;
+    let symbol_set = get_symbols(input);
 
-    for (y, line) in input.lines().enumerate() {
-        for (start_index, symbol) in line.chars().enumerate() {
-            if symbol.is_ascii_digit() && !prev_was_number {
-                prev_was_number = true;
-                let end_index = line[start_index..].find(|c: char| !c.is_ascii_digit()).unwrap_or(line[start_index..].len()) + start_index;
-                let number = match end_index {
-                    _ if end_index == start_index => line[start_index..=start_index].parse::<i32>().unwrap_or_else(|_| panic!("{} {} {}", start_index, end_index, line)),
-                    _ => line[start_index..end_index].parse::<i32>().unwrap_or_else(|_| panic!("{} {} {}", start_index, end_index, line)),
-                };
-                for x in start_index..end_index {
-                    if valid_coordinates_set.contains(&(x, y)) {
-                        sum += number;
-                        break
-                    }
+    get_parts(input)
+        .iter()
+        .filter(|part| {
+            for x in part.x_start..part.x_end {
+                if symbol_set.is_neighboor((x, part.y)) {
+                    return true
                 }
             }
-            else {
-                prev_was_number = symbol.is_ascii_digit();
-            }
-        }
-    }
-
-    sum
+            false
+        })
+        .map(|part| part.value)
+        .sum()
 }
 
-fn symbol_coordinates(input: &str) -> HashSet<(usize, usize)> {
+struct Part {
+    value: i32,
+    x_start: usize,
+    x_end: usize,
+    y: usize,
+}
+
+fn get_parts(input: &str) -> Vec<Part> {
+    let mut numbers = Vec::new();
+
+    for (y, line) in input.lines().enumerate() {
+        Regex::new(r"\d+").unwrap().find_iter(line).for_each(|number| {
+            numbers.push(Part {
+                value: number.as_str().parse::<i32>().unwrap(),
+                x_start: number.start(),
+                x_end: number.end(),
+                y
+            });
+        });
+    }
+    numbers
+}
+
+fn get_symbols(input: &str) -> HashSet<(usize, usize)> {
     let mut symbol_set = HashSet::new();
     for (y, line) in input.lines().enumerate() {
         for (x, symbol) in line.chars().enumerate() {
             if !symbol.is_ascii_digit() && symbol != '.' {
-            //if symbol != '.' {
                 symbol_set.insert((x, y));
             }
         }
@@ -44,46 +53,13 @@ fn symbol_coordinates(input: &str) -> HashSet<(usize, usize)> {
     symbol_set
 }
 
-fn valid_part_coordinates(input: HashSet<(usize, usize)>) -> HashSet<(usize, usize)> {
-    let mut valid_coordinates_set = HashSet::new();
-    for (x, y) in input {
-        if x > 0 && y > 0 { valid_coordinates_set.insert((x-1, y-1)); }
-        if y > 0 {
-            valid_coordinates_set.insert((x, y-1));
-            valid_coordinates_set.insert((x+1, y-1));
-        }
-        if x > 0 {
-            valid_coordinates_set.insert((x-1, y));
-            valid_coordinates_set.insert((x-1, y+1));
-        }
-        valid_coordinates_set.insert((x+1, y));
-        valid_coordinates_set.insert((x, y+1));
-        valid_coordinates_set.insert((x+1, y+1));
-    }
-    valid_coordinates_set
-}
-
 pub fn part_2(input: &str) -> i32 {
     let mut gears = get_gears(input);
-    let mut prev_was_number = false;
 
-    for (y, line) in input.lines().enumerate() {
-        for (start_index, symbol) in line.chars().enumerate() {
-            if symbol.is_ascii_digit() && !prev_was_number {
-                prev_was_number = true;
-                let end_index = line[start_index..].find(|c: char| !c.is_ascii_digit()).unwrap_or(line[start_index..].len()) + start_index;
-                let number = match end_index {
-                    _ if end_index == start_index => line[start_index..=start_index].parse::<i32>().unwrap_or_else(|_| panic!("{} {} {}", start_index, end_index, line)),
-                    _ => line[start_index..end_index].parse::<i32>().unwrap_or_else(|_| panic!("{} {} {}", start_index, end_index, line)),
-                };
-                for x in start_index..end_index {
-                    if gears.is_neighboor_and_push((x, y), number) {
-                        break
-                    }
-                }
-            }
-            else {
-                prev_was_number = symbol.is_ascii_digit();
+    for part in get_parts(input) {
+        for x in part.x_start..part.x_end {
+            if gears.is_neighboor_and_push((x, part.y), part.value) {
+                break
             }
         }
     }
