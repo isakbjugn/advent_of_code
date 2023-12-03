@@ -6,14 +6,7 @@ pub fn part_1(input: &str) -> i32 {
 
     get_parts(input)
         .iter()
-        .filter(|part| {
-            for x in part.x_start..part.x_end {
-                if symbol_set.is_neighboor((x, part.y)) {
-                    return true
-                }
-            }
-            false
-        })
+        .filter(|part| symbol_set.is_neighboor(part))
         .map(|part| part.value)
         .sum()
 }
@@ -64,28 +57,32 @@ pub fn part_2(input: &str) -> i32 {
         }
     }
 
-    gears.iter().filter(|(_, v)| v.len() == 2).map(|(_, v)| v.iter().product::<i32>()).sum()
+    gears.iter()
+        .filter(|(_, v)| v.len() == 2)
+        .map(|(_, v)| v.iter().product::<i32>()).sum()
 }
 
 trait Symbols {
-    fn is_neighboor(&self, coordinate: (usize, usize)) -> bool;
+    fn is_neighboor(&self, part: &Part) -> bool;
 }
 
 impl Symbols for HashSet<(usize, usize)> {
-    fn is_neighboor(&self, coordinate: (usize, usize)) -> bool {
-        let (x, y) = coordinate;
-        if x > 0 {
-            if y > 0 && self.contains(&(x-1, y-1)) { return true; }
-            if self.contains(&(x-1, y)) { return true; }
-            if self.contains(&(x-1, y+1)) { return true; }
+    fn is_neighboor(&self, part: &Part) -> bool {
+        let y = part.y;
+        for x in part.x_start..part.x_end {
+            if x > 0 {
+                if y > 0 && self.contains(&(x-1, y-1)) { return true; }
+                if self.contains(&(x-1, y)) { return true; }
+                if self.contains(&(x-1, y+1)) { return true; }
+            }
+            if y > 0 {
+                if self.contains(&(x, y-1)) { return true; }
+                if self.contains(&(x+1, y-1)) { return true; }
+            }
+            if self.contains(&(x+1, y)) { return true; }
+            if self.contains(&(x, y+1)) { return true; }
+            if self.contains(&(x+1, y+1)) { return true; }
         }
-        if y > 0 {
-            if self.contains(&(x, y-1)) { return true; }
-            if self.contains(&(x+1, y-1)) { return true; }
-        }
-        if self.contains(&(x+1, y)) { return true; }
-        if self.contains(&(x, y+1)) { return true; }
-        if self.contains(&(x+1, y+1)) { return true; }
         false
     }
 }
