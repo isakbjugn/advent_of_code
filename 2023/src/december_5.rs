@@ -1,32 +1,30 @@
 pub fn part_1(input: &str) -> i64 {
-    let categories = input.split("\n\n").collect::<Vec<&str>>();
-    let seeds = to_seeds(categories[0]);
-    let seed_to_soil_map = to_maps(categories[1]);
-    let soil_to_fertilizer_map = to_maps(categories[2]);
-    let fertilizer_to_water_map = to_maps(categories[3]);
-    let water_to_light_map = to_maps(categories[4]);
-    let light_to_temperature_map = to_maps(categories[5]);
-    let temperature_to_humidity_map = to_maps(categories[6]);
-    let humidity_to_location_map = to_maps(categories[7]);
-
-    seeds.iter()
-        .map(|seed| {
-            let mut destination = *seed;
-            destination = seed_to_soil_map.map_to_destination(destination);
-            destination = soil_to_fertilizer_map.map_to_destination(destination);
-            destination = fertilizer_to_water_map.map_to_destination(destination);
-            destination = water_to_light_map.map_to_destination(destination);
-            destination = light_to_temperature_map.map_to_destination(destination);
-            destination = temperature_to_humidity_map.map_to_destination(destination);
-            destination = humidity_to_location_map.map_to_destination(destination);
-            destination
-        })
-        .min().unwrap()
+    let (seeds_str, categories_str) = input.split_once("\n\n").unwrap();
+    let seeds = to_seeds(seeds_str);
+    let categories = to_categories(categories_str);
+    find_closest_location(seeds, &categories)
 }
 
-pub fn part_2(_input: &str) -> i64 {
+pub fn part_2(input: &str) -> i64 {
+    let (seeds_str, categories_str) = input.split_once("\n\n").unwrap();
+    let seeds = to_seeds_from_range(seeds_str);
+    let categories = to_categories(categories_str);
 
-    0
+    find_closest_location(seeds, &categories)
+}
+
+fn find_closest_location(seeds: Vec<i64>, categories: &Vec<Vec<Map>>) -> i64 {
+    seeds.iter().map(|seed| {
+        let mut destination = *seed;
+        for category in categories {
+            destination = category.map_to_destination(destination);
+        }
+        destination
+    }).min().unwrap()
+}
+
+fn to_categories(categories_str: &str) -> Vec<Vec<Map>> {
+    categories_str.split("\n\n").map(to_maps).collect()
 }
 
 fn to_seeds(input: &str) -> Vec<i64> {
@@ -34,6 +32,19 @@ fn to_seeds(input: &str) -> Vec<i64> {
         .split_whitespace()
         .map(|seed| seed.parse::<i64>().unwrap_or_else(|_| panic!("Could not parse seed: {}", seed)))
         .collect()
+}
+
+fn to_seeds_from_range(input: &str) -> Vec<i64> {
+    let mut parts = input.split_once(':').unwrap().1.split_whitespace();
+    let mut seeds = Vec::<i64>::new();
+
+    while let Some(start_str) = parts.next() {
+        let end_str = parts.next().unwrap_or("");
+        let start = start_str.parse::<i64>().unwrap();
+        let end = end_str.parse::<i64>().unwrap();
+        seeds.append(&mut (start..start+end).collect());
+    }
+    seeds
 }
 
 struct Map {
@@ -87,7 +98,7 @@ fn sample_input_part_1() {
 }
 
 #[test]
-fn sample_input_part_2_1() {
+fn sample_input_part_2() {
     let input = include_str!("../input/sample_5.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 46)
 }
