@@ -70,7 +70,7 @@ fn sample_input_part_1() {
 }
 
 #[test]
-fn sample_input_part_2_1() {
+fn sample_input_part_2() {
     let input = include_str!("../input/sample_2.txt");
     assert_eq!(part_2(input), 2286)
 }
