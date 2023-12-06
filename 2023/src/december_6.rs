@@ -2,10 +2,10 @@ use std::iter::zip;
 
 pub fn part_1(input: &str) -> i64 {
     let mut lines = input.lines();
-    let times: Vec<i64> = lines.next().unwrap().split_once(':').unwrap().1
-        .split_whitespace().map(|time| time.parse::<i64>().unwrap()).collect();
-    let records: Vec<i64> = lines.next().unwrap().split_once(':').unwrap().1
-        .split_whitespace().map(|time| time.parse::<i64>().unwrap()).collect();
+    let times: Vec<i64> = lines.next().unwrap().split_whitespace().skip(1)
+        .map(|time| time.parse::<i64>().unwrap()).collect();
+    let records: Vec<i64> = lines.next().unwrap().split_whitespace().skip(1)
+        .map(|time| time.parse::<i64>().unwrap()).collect();
     let races: Vec<(i64, i64)> = zip(times, records).collect();
 
     races.iter().map(|(time, distance)| count_winning_ways(*time, *distance)).product()

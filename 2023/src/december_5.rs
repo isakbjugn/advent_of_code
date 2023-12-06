@@ -13,20 +13,6 @@ pub fn part_2(input: &str) -> i64 {
     find_closest_location(seeds, &categories)
 }
 
-fn find_closest_location(seeds: Vec<i64>, categories: &Vec<Vec<Map>>) -> i64 {
-    seeds.iter().map(|seed| {
-        let mut destination = *seed;
-        for category in categories {
-            destination = category.map_to_destination(destination);
-        }
-        destination
-    }).min().unwrap()
-}
-
-fn to_categories(categories_str: &str) -> Vec<Vec<Map>> {
-    categories_str.split("\n\n").map(to_maps).collect()
-}
-
 fn to_seeds(input: &str) -> Vec<i64> {
     input.split_once(':').unwrap().1
         .split_whitespace()
@@ -76,6 +62,10 @@ impl DestinationCategory for Vec<Map> {
     }
 }
 
+fn to_categories(categories_str: &str) -> Vec<Vec<Map>> {
+    categories_str.split("\n\n").map(to_maps).collect()
+}
+
 fn to_maps(input: &str) -> Vec<Map> {
     input
         .lines()
@@ -89,6 +79,16 @@ fn to_maps(input: &str) -> Vec<Map> {
             }
         })
         .collect()
+}
+
+fn find_closest_location(seeds: Vec<i64>, categories: &Vec<Vec<Map>>) -> i64 {
+    seeds.iter().map(|seed| {
+        let mut destination = *seed;
+        for category in categories {
+            destination = category.map_to_destination(destination);
+        }
+        destination
+    }).min().unwrap()
 }
 
 #[test]
