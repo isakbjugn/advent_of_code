@@ -40,57 +40,34 @@ impl Hand {
         }
     }
     fn get_type(&self) -> HandType {
-        if self.most_frequent_card().1 == 5 {
-            HandType::FiveOfAKind
-        } else if self.most_frequent_card().1 == 4 {
-            HandType::FourOfAKind
-        } else if self.most_frequent_card().1 == 3 && self.second_most_frequent_card().1 == 2 {
-            HandType::FullHouse
-        } else if self.most_frequent_card().1 == 3 && self.unique() == 3 {
-            HandType::ThreeOfAKind
-        } else if self.most_frequent_card().1 == 2 && self.second_most_frequent_card().1 == 2 && self.unique() == 3 {
-            HandType::TwoPair
-        } else if self.most_frequent_card().1 == 2 && self.second_most_frequent_card().1 == 1 && self.unique() == 4 {
-            HandType::OnePair
-        } else {
-            HandType::HighCard
+        match self.highest_frequency() + self.jokers() {
+            5 => HandType::FiveOfAKind,
+            4 => HandType::FourOfAKind,
+            3 if self.second_highest_frequency() == 2 => HandType::FullHouse,
+            3 => HandType::ThreeOfAKind,
+            2 if self.second_highest_frequency() == 2 => HandType::TwoPair,
+            2 if self.second_highest_frequency() == 1 => HandType::OnePair,
+            1 => HandType::HighCard,
+            _ => panic!()
         }
     }
-    fn most_frequent_card(&self) -> (Option<&Card>, usize) {
-        let mut most_frequent_card = None;
-        let mut most_frequent_card_count = 0;
-        for card in self.cards.iter().unique() {
-            if *card == Card::Joker { continue }
-            let card_count = self.cards.iter().filter(|&c| c == card).count();
-            if card_count > most_frequent_card_count {
-                most_frequent_card = Some(card);
-                most_frequent_card_count = card_count;
-            }
-        }
-        (most_frequent_card, most_frequent_card_count + self.jokers())
+    fn highest_frequency(&self) -> usize {
+        self.cards.iter()
+            .map(|card| self.cards.iter().filter(|&c| c == card && *card != Card::Joker).count())
+            .max().unwrap()
     }
-    fn second_most_frequent_card(&self) -> (Option<&Card>, usize) {
-        let (most_frequent_card_opt, count) = self.most_frequent_card();
-        match count {
-            5 => (None, 0),
-            _ => {
-                let most_frequent_card = most_frequent_card_opt.unwrap();
-                let mut second_most_frequent_card = None;
-                let mut second_most_frequent_card_count = 0;
-                for card in self.cards.iter().unique() {
-                    if *card == Card::Joker { continue }
-                    let card_count = self.cards.iter().filter(|&c| c == card).count();
-                    if card_count > second_most_frequent_card_count && card != most_frequent_card {
-                        second_most_frequent_card = Some(card);
-                        second_most_frequent_card_count = card_count;
-                    }
-                }
-                (second_most_frequent_card, second_most_frequent_card_count)
-            }
-        }
+    fn most_frequent_card(&self) -> &Card {
+        let high_frequency = self.highest_frequency();
+        self.cards.iter()
+            .map(|card| (card, self.cards.iter().filter(|&c| c == card && *card != Card::Joker).count()))
+            .find_map(|(card, count)| if count == high_frequency { Some(card) } else { None })
+            .unwrap()
     }
-    fn unique(&self) -> usize {
-        self.cards.iter().unique().count() - (self.jokers() > 0) as usize
+    fn second_highest_frequency(&self) -> usize {
+        let most_frequent_card = self.most_frequent_card();
+        self.cards.iter()
+            .map(|card| self.cards.iter().filter(|&c| c == card && *card != Card::Joker && card != most_frequent_card).count())
+            .max().unwrap()
     }
     fn jokers(&self) -> usize {
         self.cards.iter().filter(|&card| *card == Card::Joker).count()
@@ -177,6 +154,18 @@ fn sample_input_part_1() {
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_7.txt");
     assert_eq!(part_2(input), 5905)
+}
+
+#[test]
+fn actual_input_part_1() {
+    let input = include_str!("../input/input_7.txt");
+    assert_eq!(part_1(input), 246912307)
+}
+
+#[test]
+fn actual_input_part_2() {
+    let input = include_str!("../input/input_7.txt");
+    assert_eq!(part_2(input), 246894760)
 }
 
 #[test]
