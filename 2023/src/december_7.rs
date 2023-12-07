@@ -51,23 +51,18 @@ impl Hand {
             _ => panic!()
         }
     }
-    fn highest_frequency(&self) -> usize {
-        self.cards.iter()
-            .map(|card| self.cards.iter().filter(|&c| c == card && *card != Card::Joker).count())
-            .max().unwrap()
-    }
-    fn most_frequent_card(&self) -> &Card {
-        let high_frequency = self.highest_frequency();
+    fn count(&self) -> Vec<(&Card, usize)> {
         self.cards.iter()
             .map(|card| (card, self.cards.iter().filter(|&c| c == card && *card != Card::Joker).count()))
-            .find_map(|(card, count)| if count == high_frequency { Some(card) } else { None })
-            .unwrap()
+            .unique()
+            .sorted_by(|(_, count_1), (_, count_2)| count_2.cmp(count_1))
+            .collect()
+    }
+    fn highest_frequency(&self) -> usize {
+        self.count().get(0).unwrap().1
     }
     fn second_highest_frequency(&self) -> usize {
-        let most_frequent_card = self.most_frequent_card();
-        self.cards.iter()
-            .map(|card| self.cards.iter().filter(|&c| c == card && *card != Card::Joker && card != most_frequent_card).count())
-            .max().unwrap()
+        self.count().get(1).unwrap().1
     }
     fn jokers(&self) -> usize {
         self.cards.iter().filter(|&card| *card == Card::Joker).count()
@@ -94,7 +89,7 @@ impl PartialOrd for Hand {
     }
 }
 
-#[derive(PartialEq, PartialOrd, Eq, Hash)]
+#[derive(PartialEq, PartialOrd, Eq, Hash, Debug)]
 enum Card {
     Joker, // Verdt minst som enkeltkort
     Two,
