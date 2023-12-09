@@ -26,6 +26,33 @@ pub fn part_1(input: &str) -> i32 {
     steps as i32
 }
 
+trait Nodes {
+    fn advance_to_end(&self, start_node: &str, instructions: &str) -> usize;
+}
+
+impl Nodes for HashMap<&str, (&str, &str)> {
+    fn advance_to_end(&self, start_node: &str, instructions: &str) -> usize {
+        let instruction_length = instructions.chars().count();
+        let mut current_node = start_node;
+        let mut steps = 0;
+
+        while current_node != "ZZZ" {
+            match instructions.chars().nth(steps % instruction_length) {
+                Some('L') => {
+                    current_node = self.get(current_node).unwrap().0;
+                    steps += 1;
+                }
+                Some('R') => {
+                    current_node = self.get(current_node).unwrap().1;
+                    steps += 1;
+                }
+                _ => panic!("Invalid instruction")
+            }
+        }
+        steps
+    }
+}
+
 fn to_nodes(input: &str) -> HashMap<&str, (&str, &str)> {
     input.lines()
         .map(|line| {
@@ -43,7 +70,7 @@ pub fn part_2(input: &str) -> i64 {
     let (instructions, node_str) = input.split_once("\n\n").unwrap();
     let instruction_length = instructions.chars().count();
     let nodes = to_nodes(node_str);
-    
+
     let steps_to_end_node: Vec<i64> = get_start_nodes(&nodes).iter()
         .map(|node| {
             let mut current_node = *node;
