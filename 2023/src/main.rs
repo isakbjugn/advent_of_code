@@ -65,7 +65,7 @@ fn main() {
         }
         "11" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_11::part_1(&input));
-            println!("{}. desember, del 2: {}", day.as_str(), december_11::part_2(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_11::part_2(&input, 1000000));
         }
         _ => ()
     }
