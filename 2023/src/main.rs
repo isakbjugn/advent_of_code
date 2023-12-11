@@ -9,6 +9,7 @@ mod december_7;
 mod december_8;
 mod december_9;
 mod december_10;
+mod december_11;
 
 use std::{
     env::args,
@@ -61,6 +62,10 @@ fn main() {
         "10" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_10::part_1(&input));
             println!("{}. desember, del 2: {}", day.as_str(), december_10::part_2(&input));
+        }
+        "11" => {
+            println!("{}. desember, del 1: {}", day.as_str(), december_11::part_1(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_11::part_2(&input));
         }
         _ => ()
     }
