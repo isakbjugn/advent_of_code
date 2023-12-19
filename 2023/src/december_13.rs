@@ -20,8 +20,6 @@ fn clean_and_calculate_reflection(pattern: &str) -> Reflection {
     let original_reflection = calculate_reflection(pattern, None)
         .expect("Should always be an initial reflection");
 
-    println!("Original reflection {:?}", original_reflection);
-
     for (n, c) in pattern.chars().enumerate() {
         let clean_pattern = match c {
             '#' => switch_nth_char(pattern, n, '.'),
@@ -29,12 +27,8 @@ fn clean_and_calculate_reflection(pattern: &str) -> Reflection {
             _ => continue
         };
 
-        //println!("Clean pattern:\n{}", clean_pattern);
-
         match calculate_reflection(&clean_pattern, Some(&original_reflection)) {
             Some(reflection) if reflection != original_reflection => {
-                //println!("Old reflection: {:?}", original_reflection);
-                //println!("New reflection: {:?}", reflection);
                 //let correct_index = to_index_after_rotation(pattern, n, reflection.orientation);
                 //print_with_color(&clean_pattern, correct_index);
                 return reflection
@@ -45,7 +39,7 @@ fn clean_and_calculate_reflection(pattern: &str) -> Reflection {
     unreachable!("No smudge found")
 }
 
-fn print_with_color(pattern: &str, n: usize) {
+fn _print_with_color(pattern: &str, n: usize) {
     println!("Smudge at index {}", n);
     let first = pattern.chars().take(n).collect::<String>();
     let char = pattern.chars().nth(n).unwrap();
@@ -57,14 +51,9 @@ fn to_index_after_rotation(pattern: &str, n: usize, orientation: Orientation) ->
     let (width, height) =
         (pattern.split_once('\n').unwrap().0.len() + 1, pattern.lines().count());
 
-    println!("width: {}, height: {}", width, height);
-
     let coordinates = (n % width, n / width);
-    println!("coordinates: {:?}", coordinates);
     let rotated_coordinates = rotate_index(coordinates, height, orientation);
-    println!("rotated coordinates: {:?}", rotated_coordinates);
     let index = (rotated_coordinates.1 * width) + rotated_coordinates.0;
-    println!("index: {}", index);
     index
 }
 
@@ -168,23 +157,16 @@ fn find_mirror_axis(pattern: &str, orientation: Orientation, ignore: Option<&Ref
         let (motif, rest) = split_at_index(pattern, n);
         let flipped = flip(&motif);
 
-        //println!("pattern for {:?} when n={}:\n{}", orientation, n, pattern);
-        //println!("Parts of mirror pattern:");
-        //println!("{}", motif);
         let merged = match rest {
             Some(positive_rest) => {
-                //println!("{}", flipped.red());
-                //println!("{}", positive_rest.blue());
                 [motif.clone(), flipped.clone(), positive_rest].join("\n")
             },
             None => {
-                //println!("{}", flipped.lines().take(length - n).join("\n").red());
                 [motif.clone(), flipped.clone().lines().take(length - n).join("\n")].join("\n")
             }
         };
 
         if merged.trim() == pattern.trim() {
-            //println!("Speilbildene er like");
             return Some(n);
         }
     }
