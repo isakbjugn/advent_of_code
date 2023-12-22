@@ -1,6 +1,7 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
+#[derive(Eq, Clone)]
 pub struct Grid {
     pub data: Vec<Vec<char>>,
 }

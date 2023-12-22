@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::grid::Grid;
 
 pub fn part_1(input: &str) -> u32 {
@@ -21,18 +22,23 @@ impl Grid {
             Direction::East | Direction::West => self.roll_rows(direction),
         }
     }
-    // Method to roll all columns north
+    fn cycle(&mut self) {
+        self.roll(Direction::North);
+        self.roll(Direction::West);
+        self.roll(Direction::South);
+        self.roll(Direction::East);
+    }
     fn roll_columns(&mut self, direction: Direction) {
         let cols = self.data.first().map_or(0, Vec::len);
 
         for col_index in 0..cols {
-            // Extracting the column
+            // Finn riktig kolonne
             let column: Vec<char> = self.data.iter().map(|row| row[col_index]).collect();
 
-            // Applying the roll_north operation
+            // Rull i riktig retning
             let rolled_column = roll_along_axis(&column, direction);
 
-            // Placing the modified column back into the grid
+            // Sett inn den nye kolonnen
             for (row, &new_char) in self.data.iter_mut().zip(rolled_column.iter()) {
                 row[col_index] = new_char;
             }
@@ -42,13 +48,13 @@ impl Grid {
         let rows = self.data.len();
 
         for row_index in 0..rows {
-            // Extracting the row
+            // Finn riktig rad
             let row: Vec<char> = self.data[row_index].clone();
 
-            // Applying the roll_north operation
+            // Rull i riktig retning
             let rolled_row =  roll_along_axis(&row, direction);
 
-            // Placing the modified row back into the grid
+            // Sett inn den nye raden
             self.data[row_index] = rolled_row;
         }
     }
@@ -72,11 +78,10 @@ fn roll_along_axis(axis: &[char], direction: Direction) -> Vec<char> {
             }
             match direction {
                 Direction::North => roll_slice(slice.to_vec()),
+                Direction::West => roll_slice(slice.to_vec()),
                 Direction::South => roll_slice_reverse(slice.to_vec()),
-                Direction::East => roll_slice(slice.to_vec()),
-                Direction::West => roll_slice_reverse(slice.to_vec()),
-            };
-            roll_slice(slice.to_vec())
+                Direction::East => roll_slice_reverse(slice.to_vec()),
+            }
         })
         .collect();
     new_axis.into_iter().flatten().collect()
@@ -92,52 +97,52 @@ fn roll_slice_reverse(mut slice: Vec<char>) -> Vec<char> {
     slice
 }
 
-// Helper function to determine the order of a character
+// Sorter steiner først langs en akse
 fn order_descending(c: char) -> u32 {
     match c {
         'O' => 1,
         '.' => 2,
         '#' => 3,
-        _ => 4, // You can add more cases or a default order for other characters
+        _ => 4,
     }
 }
 
-// Helper function to determine the order of a character
+// Sorter steiner sist langs en akse
 fn order_ascending(c: char) -> u32 {
     match c {
         '.' => 1,
         'O' => 2,
         '#' => 3,
-        _ => 4, // You can add more cases or a default order for other characters
+        _ => 4,
     }
 }
 
-fn calculate_load(column: Vec<char>) -> u32 {
-    let length = column.len() as u32;
-    column.iter().enumerate()
-        .filter_map(|(i, ch)| if *ch == 'O' { Some(length - i as u32) } else { None })
-        .sum()
-}
+pub fn part_2(input: &str, cycles: u32) -> u32 {
+    let mut grid = Grid::new(input).unwrap();
+    let mut configurations: HashMap<Grid, u32> = HashMap::new();
+    configurations.insert(grid.clone(), 0);
 
-fn columns_to_vecs(input: &str) -> Vec<Vec<char>> {
-    let lines: Vec<&str> = input.lines().collect();
-    let max_length = lines[0].chars().count();
-    let mut columns = vec![Vec::new(); max_length];
-
-    for line in lines {
-        for (i, ch) in line.chars().enumerate() {
-            if i < columns.len() {
-                columns[i].push(ch);
-            }
+    let mut max_cycles = cycles;
+    let mut cycle = 0;
+    while cycle < max_cycles {
+        grid.cycle();
+        if let Some(repeated_state) = configurations.get(&grid) {
+            println!("Cycle {} with load {} is a repeat of cycle {}", cycle, grid.calculate_load(), repeated_state);
+            max_cycles = lowest_remainder_greater_than_a(cycle, max_cycles, cycle - *repeated_state);
+        } else {
+            configurations.insert(grid.clone(), cycle);
         }
+        cycle += 1;
     }
-
-    columns
+    grid.calculate_load()
 }
 
-pub fn part_2(input: &str) -> i16 {
-
-    0
+fn lowest_remainder_greater_than_a(a: u32, b: u32, c: u32) -> u32 {
+    let mut remainder = b % c;
+    while remainder <= a {
+        remainder += c;
+    }
+    remainder
 }
 
 #[test]
@@ -156,7 +161,40 @@ fn roll_sample_data_north() {
 }
 
 #[test]
+fn sample_input_part_2_rolled_north_west() {
+    let sample = include_str!("../input/sample_14.txt");
+    let mut sample_cycle_1 = Grid::new(sample).unwrap();
+    sample_cycle_1.roll(Direction::North);
+    sample_cycle_1.roll(Direction::West);
+    let expected_sample_cycle_1 = Grid::new(include_str!("../input/sample_14_rolled_north_west.txt")).unwrap();
+
+    assert_eq!(sample_cycle_1, expected_sample_cycle_1)
+}
+
+#[test]
+fn sample_input_part_2_rolled_north_west_south() {
+    let sample = include_str!("../input/sample_14.txt");
+    let mut sample_cycle_1 = Grid::new(sample).unwrap();
+    sample_cycle_1.roll(Direction::North);
+    sample_cycle_1.roll(Direction::West);
+    sample_cycle_1.roll(Direction::South);
+    let expected_sample_cycle_1 = Grid::new(include_str!("../input/sample_14_rolled_north_west_south.txt")).unwrap();
+
+    assert_eq!(sample_cycle_1, expected_sample_cycle_1)
+}
+
+#[test]
+fn sample_input_part_2_cycle_1() {
+    let sample = include_str!("../input/sample_14.txt");
+    let mut sample_cycle_1 = Grid::new(sample).unwrap();
+    sample_cycle_1.cycle();
+    let expected_sample_cycle_1 = Grid::new(include_str!("../input/sample_14_cycle_1.txt")).unwrap();
+
+    assert_eq!(sample_cycle_1, expected_sample_cycle_1)
+}
+
+#[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_14.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input, 1000000000), 64)
 }
