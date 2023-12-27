@@ -15,6 +15,7 @@ mod december_13;
 mod december_14;
 mod grid;
 mod december_15;
+mod sum_to;
 
 use std::{
     env::args,

@@ -10,6 +10,7 @@ dependencies = [
  "itertools",
  "memoize",
  "num",
+ "num-traits",
  "regex",
 ]
 
