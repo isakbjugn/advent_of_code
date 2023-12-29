@@ -1,8 +1,9 @@
 use std::collections::HashMap;
-use crate::december_10::Direction::{North, South, East, West};
 use crate::december_10::Segment::{EndingInInitialDirection, EndingInOppositeDirection, Extending};
 use colored::Colorize;
 use itertools::Itertools;
+use crate::direction::Direction;
+use crate::direction::Direction::{East, North, South, West};
 
 pub fn part_1(input: &str) -> u16 {
     let grid = get_grid(input);
@@ -46,25 +47,6 @@ fn next_direction(pipe: &char, previous_direction: Direction) -> Option<Directio
         '.' => panic!("Should not find ground!"),
         _ => panic!("Invalid pipe: {}", pipe),
     }.into_iter().find(|&d| d != previous_direction.opposite())
-}
-
-#[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
-enum Direction {
-    North,
-    South,
-    East,
-    West,
-}
-
-impl Direction {
-    fn opposite(&self) -> Direction {
-        match self {
-            North => South,
-            South => North,
-            East => West,
-            West => East,
-        }
-    }
 }
 
 fn get_grid(input: &str) -> HashMap<Position, char> {
@@ -139,7 +121,6 @@ fn replace_s(grid: &mut HashMap<Position, char>, first_direction: Direction, las
         (North, West) | (East, South) => '7',
         (South, East) | (West, North) => 'L',
         (South, West) | (East, North) => 'J',
-        _ => unreachable!()
     };
     grid.entry(*start).and_modify(|e| *e = start_symbol);
 }
@@ -286,7 +267,7 @@ fn shortest_path_direction(x: usize, y: usize, height: usize, width: usize) -> D
     }
 }
 
-fn print_grid(grid: &HashMap<Position, char>, pipe_loop: &HashMap<Position, char>) {
+fn _print_grid(grid: &HashMap<Position, char>, pipe_loop: &HashMap<Position, char>) {
     let (height, width) = grid_dimensions(grid);
     for y in 0..height {
         for x in 0..width {

@@ -4,6 +4,8 @@ use std::hash::{Hash, Hasher};
 #[derive(Eq, Clone)]
 pub struct Grid {
     pub data: Vec<Vec<char>>,
+    pub height: usize,
+    pub width: usize,
 }
 
 impl Grid {
@@ -25,7 +27,10 @@ impl Grid {
             return Err("Input string is empty".to_string());
         }
 
-        Ok(Grid { data: rows })
+        Ok(Grid { height: rows.len(), width: rows[0].len(), data: rows })
+    }
+    pub fn get(&self, x: usize, y: usize) -> Option<char> {
+        self.data.get(y).and_then(|row| row.get(x).copied())
     }
 }
 
