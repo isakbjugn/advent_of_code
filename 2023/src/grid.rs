@@ -1,5 +1,7 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
+use crate::direction::Direction;
+use crate::position::Position;
 
 #[derive(Eq, Clone)]
 pub struct Grid {
@@ -31,6 +33,19 @@ impl Grid {
     }
     pub fn get(&self, x: usize, y: usize) -> Option<char> {
         self.data.get(y).and_then(|row| row.get(x).copied())
+    }
+    pub fn neighbor_in_direction(&self, x: usize, y: usize, direction: Direction) -> Option<(usize, usize)> {
+        match direction {
+            Direction::North if y > 0 => Some((x, y - 1)),
+            Direction::South if y < self.height - 1 => Some((x, y + 1)),
+            Direction::East if x < self.width - 1 => Some((x + 1, y)),
+            Direction::West if x > 0 => Some((x - 1, y)),
+            _ => None,
+        }
+    }
+    pub fn neighbor_in_direction_from_position(&self, position: Position, direction: Direction) -> Option<Position> {
+        // use the existing neighbor_in_direction implementation
+        self.neighbor_in_direction(position.x, position.y, direction).map(|(x, y)| Position { x, y })
     }
 }
 

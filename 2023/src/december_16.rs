@@ -3,12 +3,7 @@ use itertools::Itertools;
 use crate::direction::Direction;
 use crate::direction::Direction::{North, South, East, West};
 use crate::grid::Grid;
-
-#[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
-struct Position {
-    x: usize,
-    y: usize
-}
+use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
     let grid = Grid::new(input).unwrap();
@@ -30,7 +25,7 @@ fn energize(grid: &Grid, initial_beam: (Position, Direction)) -> usize {
                 visited.insert(beam);
                 match grid.next_directions(beam.0, beam.1) {
                     (Some(direction_1), Some(direction_2)) => {
-                        match (grid.next_position(&(beam.0, direction_1)), grid.next_position(&(beam.0, direction_2))) {
+                        match (grid.neighbor_in_direction_from_position(beam.0, direction_1), grid.neighbor_in_direction_from_position(beam.0, direction_2)) {
                             (Some(next_position_1), Some(next_position_2)) => {
                                 beam = (next_position_1, direction_1);
                                 beams.push((next_position_2, direction_2));
@@ -47,7 +42,7 @@ fn energize(grid: &Grid, initial_beam: (Position, Direction)) -> usize {
                         }
                     }
                     (Some(direction), None) => {
-                        match grid.next_position(&(beam.0, direction)) {
+                        match grid.neighbor_in_direction_from_position(beam.0, direction) {
                             Some(position) => beam = (position, direction),
                             None => break
                         }
@@ -62,41 +57,6 @@ fn energize(grid: &Grid, initial_beam: (Position, Direction)) -> usize {
 }
 
 impl Grid {
-    fn next_position(&self, beam: &(Position, Direction)) -> Option<Position> {
-        let (position, direction) = beam;
-        let mut next_position = *position;
-        match direction {
-            North => {
-                if position.y == 0 {
-                    return None;
-                } else {
-                    next_position.y -= 1;
-                }
-            }
-            South => {
-                if position.y == self.height - 1 {
-                    return None;
-                } else {
-                    next_position.y += 1;
-                }
-            }
-            East => {
-                if position.x == self.width - 1 {
-                    return None;
-                } else {
-                    next_position.x += 1;
-                }
-            }
-            West => {
-                if position.x == 0 {
-                    return None;
-                } else {
-                    next_position.x -= 1;
-                }
-            }
-        }
-        Some(next_position)
-    }
     fn next_directions(&self, position: Position, incoming_direction: Direction) -> (Option<Direction>, Option<Direction>) {
         match self.get(position.x, position.y) {
             Some('.') => (Some(incoming_direction), None),

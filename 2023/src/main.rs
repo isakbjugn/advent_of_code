@@ -18,6 +18,7 @@ mod december_15;
 mod sum_to;
 mod december_16;
 mod direction;
+mod position;
 
 use std::{
     env::args,
