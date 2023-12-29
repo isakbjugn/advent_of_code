@@ -12,8 +12,13 @@ struct Position {
 
 pub fn part_1(input: &str) -> usize {
     let grid = Grid::new(input).unwrap();
+    let initial_beam = (Position { x: 0, y: 0 }, East);
+    energize(&grid, initial_beam)
+}
+
+fn energize(grid: &Grid, initial_beam: (Position, Direction)) -> usize {
     let mut visited: HashSet<(Position, Direction)> = HashSet::new();
-    let mut beams = vec![(Position { x: 0, y: 0 }, East)];
+    let mut beams = vec![initial_beam];
     let mut beam;
 
     while let Some(new_beam) = beams.pop() {
@@ -118,11 +123,52 @@ impl Grid {
             _ => (None, None)
         }
     }
+    fn north_perimeter(&self) -> Vec<Position> {
+        (0..self.width).map(|x| Position { x, y: 0 }).collect()
+    }
+    fn south_perimeter(&self) -> Vec<Position> {
+        (0..self.width).map(|x| Position { x, y: self.height - 1 }).collect()
+    }
+    fn east_perimeter(&self) -> Vec<Position> {
+        (0..self.height).map(|y| Position { x: self.width - 1, y }).collect()
+    }
+    fn west_perimeter(&self) -> Vec<Position> {
+        (0..self.height).map(|y| Position { x: 0, y }).collect()
+    }
 }
 
-pub fn part_2(input: &str) -> u32 {
-
-    0
+pub fn part_2(input: &str) -> usize {
+    let grid = Grid::new(input).unwrap();
+    let mut max_energized = 0;
+    for position in grid.north_perimeter() {
+        let initial_beam = (position, South);
+        let energized = energize(&grid, initial_beam);
+        if energized > max_energized {
+            max_energized = energized;
+        }
+    }
+    for position in grid.south_perimeter() {
+        let initial_beam = (position, North);
+        let energized = energize(&grid, initial_beam);
+        if energized > max_energized {
+            max_energized = energized;
+        }
+    }
+    for position in grid.east_perimeter() {
+        let initial_beam = (position, West);
+        let energized = energize(&grid, initial_beam);
+        if energized > max_energized {
+            max_energized = energized;
+        }
+    }
+    for position in grid.west_perimeter() {
+        let initial_beam = (position, East);
+        let energized = energize(&grid, initial_beam);
+        if energized > max_energized {
+            max_energized = energized;
+        }
+    }
+    max_energized
 }
 
 #[test]
@@ -134,5 +180,5 @@ fn sample_input_part_1() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_16.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 51)
 }
