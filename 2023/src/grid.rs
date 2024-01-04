@@ -47,6 +47,22 @@ impl Grid {
         // use the existing neighbor_in_direction implementation
         self.neighbor_in_direction(position.x, position.y, direction).map(|(x, y)| Position { x, y })
     }
+    pub fn possible_directions(&self, position: Position) -> Vec<Direction> {
+        let mut directions = Vec::new();
+        if position.y > 0 {
+            directions.push(Direction::North);
+        }
+        if position.y < self.height - 1 {
+            directions.push(Direction::South);
+        }
+        if position.x < self.width - 1 {
+            directions.push(Direction::East);
+        }
+        if position.x > 0 {
+            directions.push(Direction::West);
+        }
+        directions
+    }
 }
 
 impl Hash for Grid {
