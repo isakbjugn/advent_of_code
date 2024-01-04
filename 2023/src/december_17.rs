@@ -1,43 +1,19 @@
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
-use std::time::Instant;
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
     let grid = Grid::new(input).unwrap();
-    let start_time = Instant::now();
-    let result = grid.dijkstra().unwrap();
-    println!("Dijkstra took {} ms", start_time.elapsed().as_millis());
-    result
+    grid.a_star_search().unwrap()
 }
 
-#[derive(PartialEq, Eq, Clone, Hash)]
+#[derive(PartialEq, Eq, Clone, Hash, Debug)]
 struct Vertex {
     position: Position,
     direction: Option<Direction>,
     straight_path: usize,
-}
-
-// Define a wrapper type for the heap
-#[derive(Clone, Eq, PartialEq)]
-struct DijkstraState {
-    cost: usize,
-    vertex: Vertex,
-}
-
-// Implement `Ord` for `State`. We want to order states by cost in reverse order since `BinaryHeap` is a max heap.
-impl Ord for DijkstraState {
-    fn cmp(&self, other: &Self) -> Ordering {
-        other.cost.cmp(&self.cost)
-    }
-}
-
-impl PartialOrd for DijkstraState {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
 }
 
 // Define a wrapper type for the heap
@@ -80,51 +56,6 @@ impl Grid {
     fn is_goal_state(&self, position: Position) -> bool {
         position.x == self.width - 1 && position.y == self.height - 1
     }
-    fn dijkstra(&self) -> Option<usize> {
-        let mut heap = BinaryHeap::new();
-        let mut distances: HashMap<Vertex, usize> = HashMap::new();
-
-        let start_pos = Position { x: 0, y: 0 };
-        heap.push(DijkstraState {
-            cost: 0,
-            vertex: Vertex {
-                position: start_pos,
-                direction: None,
-                straight_path: 0
-            }
-        });
-
-        while let Some(DijkstraState { cost, vertex }) = heap.pop() {
-            if self.is_goal_state(vertex.position) {
-                return Some(cost);
-            }
-
-            if let Some(&d) = distances.get(&vertex) {
-                if cost > d {
-                    continue;
-                }
-            }
-
-            distances.insert(vertex.clone(), cost);
-
-            for direction in self.legal_directions(&vertex) {
-                if let Some(neighbor) = self.neighbor_in_direction_from_position(vertex.position, direction) {
-                    let new_cost = cost + self.data[neighbor.y][neighbor.x].to_digit(10).unwrap() as usize;
-                    let new_vertex = Vertex {
-                        position: neighbor,
-                        direction: Some(direction),
-                        straight_path: count_straight_path(vertex.straight_path, vertex.direction, direction)
-                    };
-                    heap.push(DijkstraState {
-                        cost: new_cost,
-                        vertex: new_vertex
-                    });
-                }
-            }
-        }
-
-        None // No path found
-    }
     fn a_star_search(&self) -> Option<usize> {
         let mut heap = BinaryHeap::new();
         let mut distances = HashMap::new();
@@ -140,7 +71,8 @@ impl Grid {
             }
         });
 
-        while let Some(AStarState { cost, estimated_total_cost, vertex }) = heap.pop() {
+        while let Some(AStarState { cost, vertex, .. }) = heap.pop() {
+            println!("Investigating vertex: {:?}", vertex);
             if self.is_goal_state(vertex.position) {
                 return Some(cost);
             }
