@@ -6,7 +6,12 @@ use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
     let grid = Grid::new(input).unwrap();
-    grid.a_star_search().unwrap()
+    grid.a_star_search(Crucible::Standard).unwrap()
+}
+
+pub fn part_2(input: &str) -> usize {
+    let grid = Grid::new(input).unwrap();
+    grid.a_star_search(Crucible::Ultra).unwrap()
 }
 
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
@@ -37,26 +42,55 @@ impl PartialOrd for AStarState {
     }
 }
 
+#[derive(Clone, Copy)]
+enum Crucible {
+    Standard,
+    Ultra,
+}
+
 impl Grid {
-    fn legal_directions(&self, vertex: &Vertex) -> Vec<Direction> {
-        if let Some(direction) = vertex.direction {
-            let possible_directions: HashSet<Direction> = HashSet::from_iter(self.possible_directions(vertex.position));
-            let perpendicular = direction.perpendicular();
-
-            let legal_directions = match vertex.straight_path {
-                n if n < 3 => HashSet::from([perpendicular.0, perpendicular.1, direction]),
-                _ => HashSet::from([perpendicular.0, perpendicular.1]),
-            };
-
-            legal_directions.intersection(&possible_directions).cloned().collect()
+    fn crucible_directions(&self, vertex: &Vertex, crucible: Crucible) -> Vec<Direction> {
+        if vertex.direction.is_some() {
+            match crucible {
+                Crucible::Standard => self.standard_crucible_directions(vertex),
+                Crucible::Ultra => self.ultra_crucible_directions(vertex),
+            }
         } else {
             vec!(Direction::South, Direction::East)
         }
     }
-    fn is_goal_state(&self, position: Position) -> bool {
-        position.x == self.width - 1 && position.y == self.height - 1
+    fn standard_crucible_directions(&self, vertex: &Vertex) -> Vec<Direction> {
+        let direction = vertex.direction.unwrap();
+        let possible_directions: HashSet<Direction> = HashSet::from_iter(self.possible_directions(vertex.position));
+        let perpendicular = direction.perpendicular();
+
+        let legal_directions = match vertex.straight_path {
+            n if n < 3 => HashSet::from([perpendicular.0, perpendicular.1, direction]),
+            _ => HashSet::from([perpendicular.0, perpendicular.1]),
+        };
+
+        legal_directions.intersection(&possible_directions).cloned().collect()
     }
-    fn a_star_search(&self) -> Option<usize> {
+    fn ultra_crucible_directions(&self, vertex: &Vertex) -> Vec<Direction> {
+        let direction = vertex.direction.unwrap();
+        let possible_directions: HashSet<Direction> = HashSet::from_iter(self.possible_directions(vertex.position));
+        let perpendicular = direction.perpendicular();
+
+        let legal_directions = match vertex.straight_path {
+            n if n < 4 => HashSet::from([direction]),
+            n if n < 10 => HashSet::from([perpendicular.0, perpendicular.1, direction]),
+            _ => HashSet::from([perpendicular.0, perpendicular.1]),
+        };
+
+        legal_directions.intersection(&possible_directions).cloned().collect()
+    }
+    fn is_goal_state(&self, vertex: &Vertex, crucible: Crucible) -> bool {
+        match crucible {
+            Crucible::Standard => vertex.position.x == self.width - 1 && vertex.position.y == self.height - 1,
+            Crucible::Ultra => vertex.position.x == self.width - 1 && vertex.position.y == self.height - 1 && vertex.straight_path > 3,
+        }
+    }
+    fn a_star_search(&self, crucible: Crucible) -> Option<usize> {
         let mut heap = BinaryHeap::new();
         let mut distances = HashMap::new();
 
@@ -72,8 +106,7 @@ impl Grid {
         });
 
         while let Some(AStarState { cost, vertex, .. }) = heap.pop() {
-            println!("Investigating vertex: {:?}", vertex);
-            if self.is_goal_state(vertex.position) {
+            if self.is_goal_state(&vertex, crucible) {
                 return Some(cost);
             }
 
@@ -85,7 +118,7 @@ impl Grid {
 
             distances.insert(vertex.clone(), cost);
 
-            for direction in self.legal_directions(&vertex) {
+            for direction in self.crucible_directions(&vertex, crucible) {
                 if let Some(neighbor) = self.neighbor_in_direction_from_position(vertex.position, direction) {
                     let new_cost = cost + self.data[neighbor.y][neighbor.x].to_digit(10).unwrap() as usize;
                     let estimated_total_cost = new_cost + self.manhattan_distance(neighbor);
@@ -122,11 +155,6 @@ fn count_straight_path(straight_path: usize, previous_direction: Option<Directio
     }
 }
 
-pub fn part_2(input: &str) -> u32 {
-
-    0
-}
-
 #[test]
 fn sample_input_part_1() {
     let input = include_str!("../input/sample_17.txt");
@@ -136,5 +164,11 @@ fn sample_input_part_1() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_17.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 94)
+}
+
+#[test]
+fn sample_input_part_2_2() {
+    let input = include_str!("../input/sample_17_2.txt");
+    assert_eq!(part_2(input), 71)
 }
