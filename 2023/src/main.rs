@@ -19,6 +19,7 @@ mod sum_to;
 mod december_16;
 mod direction;
 mod december_17;
+mod december_18;
 mod position;
 
 use std::{
@@ -100,6 +101,10 @@ fn main() {
         "17" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_17::part_1(&input));
             println!("{}. desember, del 2: {}", day.as_str(), december_17::part_2(&input));
+        }
+        "18" => {
+            println!("{}. desember, del 1: {}", day.as_str(), december_18::part_1(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_18::part_2(&input));
         }
         _ => ()
     }
