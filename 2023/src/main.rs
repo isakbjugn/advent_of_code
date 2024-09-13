@@ -11,6 +11,7 @@ mod december_9;
 mod december_10;
 mod december_11;
 mod december_12;
+mod december_12_recursive;
 mod december_13;
 mod december_14;
 mod grid;
@@ -78,8 +79,8 @@ fn main() {
             println!("{}. desember, del 2: {}", day.as_str(), december_11::part_2(&input, 1000000));
         }
         "12" => {
-            println!("{}. desember, del 1: {}", day.as_str(), december_12::part_1(&input));
-            println!("{}. desember, del 2: {}", day.as_str(), december_12::part_2(&input, 5));
+            println!("{}. desember, del 1: {}", day.as_str(), december_12_recursive::part_1(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_12_recursive::part_2(&input));
         }
         "13" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_13::part_1(&input));
