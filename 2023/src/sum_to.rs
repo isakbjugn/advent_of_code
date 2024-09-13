@@ -4,6 +4,7 @@ use std::iter::Sum;
 
 pub trait SumTo<T, U> {
     fn sum_to(&mut self) -> U where U: Num + Sum<U>, T: Into<U> + Copy;
+    #[allow(unused)]
     fn checked_sum_to(&mut self) -> Result<U, String> where U: Num + CheckedAdd + Sum<U>, T: Into<U> + Copy;
 }
 

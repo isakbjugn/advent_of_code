@@ -26,6 +26,7 @@ pub fn part_1(input: &str) -> i32 {
     steps as i32
 }
 
+#[allow(unused)]
 trait Nodes {
     fn advance_to_end(&self, start_node: &str, instructions: &str) -> usize;
 }
