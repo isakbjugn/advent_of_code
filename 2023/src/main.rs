@@ -3,8 +3,8 @@ mod december_2;
 mod december_3;
 mod december_4;
 mod december_5;
-mod december_6;
 mod december_5_range;
+mod december_6;
 mod december_7;
 mod december_8;
 mod december_9;
@@ -13,12 +13,13 @@ mod december_11;
 mod december_12;
 mod december_13;
 mod december_14;
-mod grid;
 mod december_15;
-mod sum_to;
 mod december_16;
-mod direction;
 mod december_17;
+
+mod grid;
+mod sum_to;
+mod direction;
 mod position;
 
 use std::{
