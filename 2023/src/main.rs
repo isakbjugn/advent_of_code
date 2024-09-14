@@ -10,7 +10,6 @@ mod december_8;
 mod december_9;
 mod december_10;
 mod december_11;
-mod december_12;
 mod december_12_recursive;
 mod december_13;
 mod december_14;
