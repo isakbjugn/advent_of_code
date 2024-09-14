@@ -47,6 +47,9 @@ fn search(record: &str, groups: &Vec<u32>) -> u32 {
                 Some(("##", _)) if groups.first() == Some(&1) => {
                     0
                 },
+                Some(("#.", _)) if groups.first().unwrap() > &1 => {
+                    0
+                },
                 Some(("#?", new_remainder)) if groups.first() == Some(&1) => {
                     search(&format!("#.{}", new_remainder), groups)
                 },
@@ -98,6 +101,16 @@ fn sample_input_part_1_1() {
     assert_eq!(search("????.#...#...", &vec![4,1,1]), 1);
     assert_eq!(search("????.######..#####.", &vec![1,6,5]), 4);
     assert_eq!(search("?###????????", &vec![3,2,1]), 10);
+}
+
+#[test]
+fn specific_line_part_1() {
+    assert_eq!(part_1("..??#???##??#?? 4,2,2"), 4);
+    assert_eq!(part_1(".#?????????.?. 9,1"), 1);
+    assert_eq!(part_1(".????#..??#? 4,2"), 2);
+    assert_eq!(part_1("??#.#???#? 2,1,1"), 1);
+    assert_eq!(part_1("?#??.???#?#????? 4,1,1,2,3"), 2);
+    assert_eq!(part_1(".??????.?##. 1,3"), 6);
 }
 
 #[test]
