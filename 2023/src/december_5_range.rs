@@ -142,21 +142,25 @@ fn sample_input_part_3() {
     assert_eq!(part_2_range(input), 46)
 }
 
+#[allow(unused)]
 struct SeedRules {
     source_start: i64,
     source_end: i64,
     dist_between_dest_and_source: i64,
 }
 
+#[allow(unused)]
 struct SeedRange {
     start: i64,
     end: i64,
 }
 
+#[allow(unused)]
 fn is_within_range(val: i64, rule: &SeedRules) -> bool {
     val >= rule.source_start && val < rule.source_end
 }
 
+#[allow(unused)]
 fn change_seed_ranges(seed_ranges: &mut Vec<SeedRange>, rules: &[SeedRules]) {
     let mut i = 0;
     while i < seed_ranges.len() {
