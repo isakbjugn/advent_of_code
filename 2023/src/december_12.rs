@@ -7,6 +7,14 @@ pub fn part_1(input: &str) -> u64 {
         .sum()
 }
 
+pub fn part_2(input: &str) -> u64 {
+    input.lines()
+        .map(to_long_format)
+        .map(to_record_and_groups)
+        .map(|(record, groups)| search(record, &groups, &mut HashMap::new()))
+        .sum()
+}
+
 fn search(record: &str, groups: &Vec<u32>, memo: &mut HashMap<(String, u32), u64>) -> u64 {
     let defect_springs = groups.iter().sum::<u32>();
     if let Some(&result) = memo.get(&(String::from(record), defect_springs)) {
@@ -109,14 +117,6 @@ fn search(record: &str, groups: &Vec<u32>, memo: &mut HashMap<(String, u32), u64
     result
 }
 
-pub fn part_2(input: &str) -> u64 {
-    input.lines()
-        .map(to_long_format)
-        .map(to_record_and_groups)
-        .map(|(record, groups)| search(record, &groups, &mut HashMap::new()))
-        .sum()
-}
-
 fn to_record_and_groups(line: &str) -> (&str, Vec<u32>) {
     let (record, groups) = line.split_once(' ').unwrap();
     (record,groups.split(',').map(|c| c.parse::<u32>().unwrap()).collect())
@@ -167,4 +167,10 @@ fn actual_input_part_1() {
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_12.txt");
     assert_eq!(part_2(input), 525152)
+}
+
+#[test]
+fn actual_input_part_2() {
+    let input = include_str!("../input/input_12.txt");
+    assert_eq!(part_2(input), 7139671893722)
 }
