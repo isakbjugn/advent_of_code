@@ -31,6 +31,9 @@ fn main() {
     let day = args().nth(1).unwrap();
     let path = format!("input/input_{}.txt", day);
     let input = read_to_string(path).unwrap();
+    
+    use std::time::Instant;
+    let now = Instant::now();
 
     match day.as_str() {
         "1" => {
@@ -104,4 +107,7 @@ fn main() {
         }
         _ => ()
     }
+
+    let elapsed = now.elapsed();
+    println!("Tid brukt: {:.2?}", elapsed);
 }
