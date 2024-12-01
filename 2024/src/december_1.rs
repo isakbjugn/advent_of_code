@@ -15,13 +15,11 @@ pub fn part_1(input: &str) -> u32 {
 }
 
 pub fn part_2(input: &str) -> u32 {
-    let (mut first_list, mut second_list): (Vec<u32>, Vec<u32>) = input
+    let (first_list, second_list): (Vec<u32>, Vec<u32>) = input
         .lines()
         .map(|line| line.split_once("   ").unwrap())
         .map(|(a, b)| (a.parse::<u32>().unwrap(), b.parse::<u32>().unwrap()))
         .unzip();
-    first_list.sort();
-    second_list.sort();
 
     first_list
         .iter()
@@ -40,4 +38,16 @@ fn sample_input_part_1() {
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_1.txt");
     assert_eq!(part_2(input), 31)
+}
+
+#[test]
+fn input_part_1() {
+    let input = include_str!("../input/input_1.txt");
+    assert_eq!(part_1(input), 765748)
+}
+
+#[test]
+fn input_part_2() {
+    let input = include_str!("../input/input_1.txt");
+    assert_eq!(part_2(input), 27732508)
 }
