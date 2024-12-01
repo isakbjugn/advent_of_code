@@ -7,7 +7,9 @@ pub fn part_1(input: &str) -> u32 {
     first_list.sort();
     second_list.sort();
 
-    first_list.iter().zip(second_list.iter())
+    first_list
+        .iter()
+        .zip(second_list.iter())
         .map(|(a, &b)| a.abs_diff(b))
         .sum()
 }
@@ -20,7 +22,7 @@ pub fn part_2(input: &str) -> u32 {
         .unzip();
     first_list.sort();
     second_list.sort();
-    
+
     first_list
         .iter()
         .map(|a| (a, second_list.iter().filter(|&b| a == b).count() as u32))

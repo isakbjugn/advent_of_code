@@ -1,7 +1,4 @@
-use std::{
-    env::args,
-    fs::read_to_string
-};
+use std::{env::args, fs::read_to_string};
 
 mod december_1;
 
@@ -10,6 +7,7 @@ fn main() {
     let path = format!("input/input_{}.txt", day);
     let input = read_to_string(path).unwrap();
 
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     match day.as_str() {
         "1" => {
             println!("{}. desember, del 1: {:?}", day.as_str(), december_1::part_1(&input));
