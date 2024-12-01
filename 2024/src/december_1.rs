@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 pub fn part_1(input: &str) -> u32 {
     let (mut first_list, mut second_list): (Vec<u32>, Vec<u32>) = input
         .lines()
@@ -20,11 +22,12 @@ pub fn part_2(input: &str) -> u32 {
         .map(|line| line.split_once("   ").unwrap())
         .map(|(a, b)| (a.parse::<u32>().unwrap(), b.parse::<u32>().unwrap()))
         .unzip();
+    
+    let counts = second_list.into_iter().counts();
 
     first_list
         .iter()
-        .map(|a| (a, second_list.iter().filter(|&b| a == b).count() as u32))
-        .map(|(a, n)| a * n)
+        .map(|a| a * counts.get(a).map(|&b| b as u32).unwrap_or(0))
         .sum()
 }
 
