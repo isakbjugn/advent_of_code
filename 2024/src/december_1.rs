@@ -22,7 +22,7 @@ pub fn part_2(input: &str) -> u32 {
         .map(|line| line.split_once("   ").unwrap())
         .map(|(a, b)| (a.parse::<u32>().unwrap(), b.parse::<u32>().unwrap()))
         .unzip();
-    
+
     let counts = second_list.into_iter().counts();
 
     first_list
