@@ -6,6 +6,7 @@ pub fn part_1(input: &str) -> usize {
                 .map(|c| c.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>()
         })
+        .map(into_increasing)
         .filter(is_report_safe)
         .count()
 }
@@ -18,6 +19,7 @@ pub fn part_2(input: &str) -> usize {
                 .map(|c| c.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>()
         })
+        .map(into_increasing)
         .filter(|report| {
             for (drop_index, _) in report.iter().enumerate() {
                 let mut shorter_report = report.clone();
@@ -32,36 +34,24 @@ pub fn part_2(input: &str) -> usize {
         .count()
 }
 
-fn is_report_safe(report: &Vec<u32>) -> bool {
-    let length = report.iter().len();
-    let increasing = report.first().unwrap() < report.last().unwrap();
+fn into_increasing(report: Vec<u32>) -> Vec<u32> {
+    match report.first().unwrap() < report.last().unwrap() {
+        true => report,
+        false => report.into_iter().rev().collect(),
+    }
+}
 
-    match increasing {
-        true => {
-            for (index, &level) in report.iter().enumerate() {
-                if let Some(&next) = report.get(index + 1) {
-                    match next as i32 - level as i32 {
-                        difference if difference < 1 => return false,
-                        difference if difference > 3 => return false,
-                        _ => continue,
-                    }
-                }
+fn is_report_safe(report: &Vec<u32>) -> bool {
+    for (index, &level) in report.iter().enumerate() {
+        if let Some(&next) = report.get(index + 1) {
+            match next as i32 - level as i32 {
+                difference if difference < 1 => return false,
+                difference if difference > 3 => return false,
+                _ => continue,
             }
-            true
-        }
-        false => {
-            for (index, &level) in report.iter().rev().enumerate() {
-                if let Some(&next) = report.get(length - index) {
-                    match level as i32 - next as i32 {
-                        difference if difference < 1 => return false,
-                        difference if difference > 3 => return false,
-                        _ => continue,
-                    }
-                }
-            }
-            true
         }
     }
+    true
 }
 
 #[test]
