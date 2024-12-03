@@ -1,60 +1,67 @@
-use regex::Regex;
+use itertools::Itertools;
+use regex::{Captures, Regex};
+use std::collections::HashMap;
 
 pub fn part_1(input: &str) -> u32 {
-    let pattern = r"mul\((\d+),(\d+)\)";
+    Regex::new(r"mul\((\d+),(\d+)\)")
+        .unwrap()
+        .captures_iter(input)
+        .map(multiply_captures)
+        .sum()
+}
 
-    let re = Regex::new(pattern).unwrap();
-    let mut sum = 0;
+enum Instruction {
+    Mul(u32),
+    Do,
+    Dont,
+}
 
-    for caps in re.captures_iter(input) {
-        let num1 = caps.get(1).unwrap().as_str().parse::<u32>().unwrap();
-        let num2 = caps.get(2).unwrap().as_str().parse::<u32>().unwrap();
-        sum += num1 * num2;
-    }
-    sum
+fn multiply_captures(captures: Captures) -> u32 {
+    let num1 = captures.get(1).unwrap().as_str().parse::<u32>().unwrap();
+    let num2 = captures.get(2).unwrap().as_str().parse::<u32>().unwrap();
+    num1 * num2
 }
 
 pub fn part_2(input: &str) -> u32 {
-    let mul_pattern = r"mul\((\d+),(\d+)\)";
-    let do_pattern = r"do\(\)";
-    let dont_pattern = r"don't\(\)";
+    let mut instructions = HashMap::<usize, Instruction>::new();
 
-    let mul_re = Regex::new(mul_pattern).unwrap();
-    let do_re = Regex::new(do_pattern).unwrap();
-    let dont_re = Regex::new(dont_pattern).unwrap();
-
-    let products = mul_re
+    Regex::new(r"mul\((\d+),(\d+)\)")
+        .unwrap()
         .captures_iter(input)
-        .map(|capture| {
-            let num1 = capture.get(1).unwrap().as_str().parse::<u32>().unwrap();
-            let num2 = capture.get(2).unwrap().as_str().parse::<u32>().unwrap();
-            (capture.get(0).unwrap().start(), num1 * num2)
+        .map(|captures| {
+            (
+                captures.get(0).unwrap().start(),
+                multiply_captures(captures),
+            )
         })
-        .collect::<Vec<(usize, u32)>>();
+        .for_each(|(index, product)| {
+            instructions.insert(index, Instruction::Mul(product));
+        });
 
-    let dos = do_re
+    Regex::new(r"do\(\)")
+        .unwrap()
         .captures_iter(input)
-        .map(|capture| capture.get(0).unwrap().start())
-        .collect::<Vec<usize>>();
-    let donts = dont_re
-        .captures_iter(input)
-        .map(|capture| capture.get(0).unwrap().start())
-        .collect::<Vec<usize>>();
+        .map(|captures| captures.get(0).unwrap().start())
+        .for_each(|index| {
+            instructions.insert(index, Instruction::Do);
+        });
 
+    Regex::new(r"don't\(\)")
+        .unwrap()
+        .captures_iter(input)
+        .map(|captures| captures.get(0).unwrap().start())
+        .for_each(|index| {
+            instructions.insert(index, Instruction::Dont);
+        });
+
+    let mut do_multiply = true;
     let mut sum = 0;
-    'product: for (index, product) in products.iter() {
-        for closest_index in (0..*index).rev() {
-            if dos.contains(&closest_index) {
-                sum += *product;
-                continue 'product;
-            }
-            if donts.contains(&closest_index) {
-                continue 'product;
-            }
-            if closest_index == 0 {
-                sum += *product;
-                continue 'product;
-            }
+    for (_, instruction) in instructions.into_iter().sorted_by_key(|(index, _)| *index) {
+        match instruction {
+            Instruction::Mul(product) if do_multiply => sum += product,
+            Instruction::Do => do_multiply = true,
+            Instruction::Dont => do_multiply = false,
+            _ => continue,
         }
     }
     sum
