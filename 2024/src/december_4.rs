@@ -147,40 +147,26 @@ fn extract_northwest_diagonals(input: &str) -> Vec<String> {
 }
 
 pub fn part_2(input: &str) -> usize {
-    let stencil = vec![
-        vec!['M', '*', 'S'],
-        vec!['*', 'A', '*'],
-        vec!['M', '*', 'S'],
-    ];
-    let stencil_2 = vec![
-        vec!['M', '*', 'M'],
-        vec!['*', 'A', '*'],
-        vec!['S', '*', 'S'],
-    ];
-    let stencil_3 = vec![
-        vec!['S', '*', 'M'],
-        vec!['*', 'A', '*'],
-        vec!['S', '*', 'M'],
-    ];
-    let stencil_4 = vec![
-        vec!['S', '*', 'S'],
-        vec!['*', 'A', '*'],
-        vec!['M', '*', 'M'],
-    ];
-
-    let input = input.lines().map(|line| line.chars().collect()).collect::<Vec<Vec<char>>>();
-
-    count_stencil_matches(&input, &stencil) + count_stencil_matches(&input, &stencil_2) + count_stencil_matches(&input, &stencil_3) + count_stencil_matches(&input, &stencil_4)
-
+    let stencil = "M*S\n*A*\nM*S";
+    let stencil_90 = rotate_string(stencil);
+    let stencil_180 = rotate_string(&stencil_90);
+    let stencil_270 = rotate_string(&stencil_180);
+    
+    count_stencil_matches(input, stencil)
+        + count_stencil_matches(input, &stencil_90)
+        + count_stencil_matches(input, &stencil_180)
+        + count_stencil_matches(input, &stencil_270)
 }
 
-fn count_stencil_matches(input: &[Vec<char>], stencil: &[Vec<char>]) -> usize {
+fn count_stencil_matches(input: &str, stencil: &str) -> usize {
+    let input_grid = input.lines().map(|line| line.chars().collect()).collect::<Vec<Vec<char>>>();
+    let stencil_grid = stencil.lines().map(|line| line.chars().collect()).collect::<Vec<Vec<char>>>();
     let mut count = 0;
 
-    let input_rows = input.len();
-    let input_cols = input[0].len();
-    let stencil_rows = stencil.len();
-    let stencil_cols = stencil[0].len();
+    let input_rows = input_grid.len();
+    let input_cols = input_grid[0].len();
+    let stencil_rows = stencil_grid.len();
+    let stencil_cols = stencil_grid[0].len();
 
     // Iterate over all possible top-left positions for the stencil in the input
     for i in 0..=input_rows - stencil_rows {
@@ -191,7 +177,7 @@ fn count_stencil_matches(input: &[Vec<char>], stencil: &[Vec<char>]) -> usize {
             for si in 0..stencil_rows {
                 for sj in 0..stencil_cols {
                     // Asterisk matches any character, otherwise compare directly
-                    if stencil[si][sj] != '*' && input[i + si][j + sj] != stencil[si][sj] {
+                    if stencil_grid[si][sj] != '*' && input_grid[i + si][j + sj] != stencil_grid[si][sj] {
                         is_match = false;
                         break;
                     }
