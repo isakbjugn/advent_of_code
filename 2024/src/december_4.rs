@@ -146,9 +146,70 @@ fn extract_northwest_diagonals(input: &str) -> Vec<String> {
     diagonals
 }
 
-pub fn part_2(input: &str) -> u32 {
-    0
+pub fn part_2(input: &str) -> usize {
+    let stencil = vec![
+        vec!['M', '*', 'S'],
+        vec!['*', 'A', '*'],
+        vec!['M', '*', 'S'],
+    ];
+    let stencil_2 = vec![
+        vec!['M', '*', 'M'],
+        vec!['*', 'A', '*'],
+        vec!['S', '*', 'S'],
+    ];
+    let stencil_3 = vec![
+        vec!['S', '*', 'M'],
+        vec!['*', 'A', '*'],
+        vec!['S', '*', 'M'],
+    ];
+    let stencil_4 = vec![
+        vec!['S', '*', 'S'],
+        vec!['*', 'A', '*'],
+        vec!['M', '*', 'M'],
+    ];
+
+    let input = input.lines().map(|line| line.chars().collect()).collect::<Vec<Vec<char>>>();
+
+    count_stencil_matches(&input, &stencil) + count_stencil_matches(&input, &stencil_2) + count_stencil_matches(&input, &stencil_3) + count_stencil_matches(&input, &stencil_4)
+
 }
+
+fn count_stencil_matches(input: &[Vec<char>], stencil: &[Vec<char>]) -> usize {
+    let mut count = 0;
+
+    let input_rows = input.len();
+    let input_cols = input[0].len();
+    let stencil_rows = stencil.len();
+    let stencil_cols = stencil[0].len();
+
+    // Iterate over all possible top-left positions for the stencil in the input
+    for i in 0..=input_rows - stencil_rows {
+        for j in 0..=input_cols - stencil_cols {
+            let mut is_match = true;
+
+            // Check if the stencil matches at this position
+            for si in 0..stencil_rows {
+                for sj in 0..stencil_cols {
+                    // Asterisk matches any character, otherwise compare directly
+                    if stencil[si][sj] != '*' && input[i + si][j + sj] != stencil[si][sj] {
+                        is_match = false;
+                        break;
+                    }
+                }
+                if !is_match {
+                    break;
+                }
+            }
+
+            if is_match {
+                count += 1; // Increment the count for a successful match
+            }
+        }
+    }
+
+    count
+}
+
 
 #[test]
 fn sample_input_part_1() {
@@ -159,7 +220,7 @@ fn sample_input_part_1() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_4.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 9)
 }
 
 #[test]
