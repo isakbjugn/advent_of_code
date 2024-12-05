@@ -8,10 +8,7 @@ pub fn part_1(input: &str) -> u32 {
         .filter(|update| {
             update.is_sorted_by(|a, b| sort_by_rules(a, b, &rules) != Ordering::Greater)
         })
-        .map(|update| {
-            let middle_index = (update.len() - 1) / 2;
-            *update.get(middle_index).expect("No middle element!")
-        })
+        .map(middle_element)
         .sum()
 }
 
@@ -27,10 +24,7 @@ pub fn part_2(input: &str) -> u32 {
             update.sort_by(|a, b| sort_by_rules(a, b, &rules));
             update
         })
-        .map(|update| {
-            let middle_index = (update.len() - 1) / 2;
-            *update.get(middle_index).expect("No middle element!")
-        })
+        .map(middle_element)
         .sum()
 }
 
@@ -54,15 +48,23 @@ fn read_input(input: &str) -> (Vec<(u32, u32)>, Vec<Vec<u32>>) {
 }
 
 fn sort_by_rules(a: &u32, b: &u32, rules: &[(u32, u32)]) -> Ordering {
-    for (one, two) in rules.iter() {
-        if one == a && two == b {
-            return Ordering::Less;
-        }
-        if one == b && two == a {
-            return Ordering::Greater;
-        }
-    }
-    Ordering::Equal
+    rules
+        .iter()
+        .find_map(|(one, two)| {
+            if one == a && two == b {
+                Some(Ordering::Less)
+            } else if one == b && two == a {
+                Some(Ordering::Greater)
+            } else {
+                None
+            }
+        })
+        .unwrap_or(Ordering::Equal)
+}
+
+fn middle_element(vec: Vec<u32>) -> u32 {
+    let middle_index = (vec.len() - 1) / 2;
+    *vec.get(middle_index).expect("No middle element!")
 }
 
 #[test]
