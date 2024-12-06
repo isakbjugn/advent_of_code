@@ -1,6 +1,5 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use crate::direction;
 use crate::direction::Direction;
 use crate::position::Position;
 
@@ -32,14 +31,21 @@ impl Grid {
 
         Ok(Grid { height: rows.len(), width: rows[0].len(), data: rows })
     }
-    pub fn get(&self, x: usize, y: usize) -> Option<char> {
-        self.data.get(y).and_then(|row| row.get(x).copied())
+    fn valid_position(&self, position: &Position) -> bool {
+        position.x < self.width && position.y < self.height
     }
-    pub fn get_value_in_direction(&self, x: usize, y: usize, direction: Direction) -> Option<char> {
-        self.neighbor_in_direction(x, y, direction)
+    pub fn get_value(&self, position: &Position) -> Option<char> {
+        if self.valid_position(position) {
+            Some(self.data[position.y][position.x])
+        } else {
+            None
+        }
+    }
+    pub fn next_value(&self, position: &Position, direction: Direction) -> Option<char> {
+        self.neighbor_in_direction(position.x, position.y, direction)
             .map(|next_cell| self.data[next_cell.1][next_cell.0])
     }
-    pub fn neighbor_in_direction(&self, x: usize, y: usize, direction: Direction) -> Option<(usize, usize)> {
+    fn neighbor_in_direction(&self, x: usize, y: usize, direction: Direction) -> Option<(usize, usize)> {
         match direction {
             Direction::North if y > 0 => Some((x, y - 1)),
             Direction::South if y < self.height - 1 => Some((x, y + 1)),
@@ -48,7 +54,7 @@ impl Grid {
             _ => None,
         }
     }
-    pub fn neighbor_in_direction_from_position(&self, position: Position, direction: Direction) -> Option<Position> {
+    pub fn next_position(&self, position: Position, direction: Direction) -> Option<Position> {
         // use the existing neighbor_in_direction implementation
         self.neighbor_in_direction(position.x, position.y, direction).map(|(x, y)| Position { x, y })
     }
@@ -76,6 +82,16 @@ impl Grid {
             }
         }
         None
+    }
+    
+    pub fn direction_vec(&self, position: Position, direction: Direction) -> Vec<Position> {
+        let mut positions = Vec::new();
+        let mut current_position = position;
+        while let Some(next_position) = self.next_position(current_position, direction) {
+            positions.push(next_position);
+            current_position = next_position;
+        }
+        positions
     }
 }
 
