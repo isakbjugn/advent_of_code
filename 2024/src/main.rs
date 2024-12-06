@@ -7,6 +7,10 @@ mod december_4;
 mod december_5;
 mod december_6;
 
+mod position;
+mod direction;
+mod grid;
+
 fn main() {
     let day = args().nth(1).unwrap();
     let path = format!("input/input_{}.txt", day);
