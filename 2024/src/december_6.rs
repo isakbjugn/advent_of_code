@@ -1,14 +1,9 @@
 use std::collections::HashSet;
-use itertools::Itertools;
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
-    find_path(input).len()
-}
-
-fn find_path(input: &str) -> HashSet<Position> {
     let grid = Grid::new(input).expect("Unable to create Grid!");
     let mut position = grid.find('^').expect("Could not find starting position");
     let mut visited = HashSet::<Position>::new();
@@ -22,47 +17,58 @@ fn find_path(input: &str) -> HashSet<Position> {
             _  => break
         }
     }
-    visited
+    visited.len()
 }
 
 pub fn part_2(input: &str) -> usize {
-    let visited = find_path(input);
-
     let grid = Grid::new(input).expect("Unable to create Grid!");
-    let starting_position = grid.find('^').expect("Could not find starting position");
-    let starting_direction = Direction::North;
-    
-    visited.into_iter().filter(|position| {
-        let grid = {
-            let mut grid = grid.clone();
-            grid.data[position.y][position.x] = '#';
-            grid
-        };
-        
-        let mut previous_positions_directions = HashSet::<(Position, Direction)>::new();
-        
-        let mut position = starting_position;
-        let mut facing = starting_direction;
+    let mut position = grid.find('^').expect("Could not find starting position");
+    let mut facing = Direction::North;
 
-        while let Some(next_cell) = grid.next_position(position, facing) {
-            if previous_positions_directions.iter().contains(&(position, facing)) {
-                return true
-            } else {
-                previous_positions_directions.insert((position, facing));
-            }
-            
-            match grid.get_value(&next_cell) {
-                Some('#') => facing = {
-                    facing.rotate_clockwise()
-                },
-                Some('.') | Some('^') => {
-                    position = next_cell;
+    let mut faced_obstacles = HashSet::<(Position, Direction)>::new(); // obstacle and incoming direction
+    let mut loop_positions = HashSet::<Position>::new();
+
+    while let Some(next_cell) = grid.next_position(position, facing) {
+        match grid.get_value(&next_cell) {
+            Some('#') => facing = {
+                faced_obstacles.insert((next_cell, facing));
+                facing.rotate_clockwise()
+            },
+            Some('.') | Some('^') => {
+                if leads_to_loop(position, facing, &grid, faced_obstacles.clone()) {
+                    loop_positions.insert(next_cell);
                 }
-                _ => { unreachable!() }
+                position = next_cell;
             }
+            _ => { unreachable!() }
         }
-        false
-    }).count()
+    }
+
+    loop_positions.len()
+}
+
+fn leads_to_loop(position: Position, originally_facing: Direction, grid: &Grid, mut faced_obstacles: HashSet<(Position, Direction)>) -> bool {
+    let mut position = position;
+    let mut facing = originally_facing.rotate_clockwise();
+
+    faced_obstacles.insert((grid.next_position(position, originally_facing).unwrap(), originally_facing));
+
+    while let Some(next_cell) = grid.next_position(position, facing) {
+        if faced_obstacles.contains(&(next_cell, facing)) {
+            return true;
+        }
+        match grid.get_value(&next_cell) {
+            Some('#') => facing = {
+                faced_obstacles.insert((next_cell, facing));
+                facing.rotate_clockwise()
+            },
+            Some('.') | Some('^') => {
+                position = next_cell;
+            }
+            _ => { unreachable!() }
+        }
+    }
+    false
 }
 
 #[test]
