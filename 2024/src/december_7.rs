@@ -1,21 +1,22 @@
-use itertools::Itertools;
+use itertools::{repeat_n, Itertools};
+use rayon::prelude::*;
 
 pub fn part_1(input: &str) -> u64 {
     to_ans_and_operands(input)
-        .filter(|(ans, operands)| can_be_created(ans, operands, vec!['+', '*']))
+        .filter(|(ans, operands)| can_be_created(ans, operands, &['+', '*']))
         .map(|(ans, _)| ans)
         .sum()
 }
 
 pub fn part_2(input: &str) -> u64 {
     to_ans_and_operands(input)
-        .filter(|(ans, operands)| can_be_created(ans, operands, vec!['+', '*', '|']))
+        .filter(|(ans, operands)| can_be_created(ans, operands, &['+', '*', '|']))
         .map(|(ans, _)| ans)
         .sum()
 }
 
-fn to_ans_and_operands(input: & str) -> impl Iterator<Item = (u64, Vec<u64>)> + use<'_> {
-    input.lines()
+fn to_ans_and_operands(input: & str) -> impl ParallelIterator<Item = (u64, Vec<u64>)> + use<'_> {
+    input.par_lines()
         .map(|line| line.split_once(": ").unwrap())
         .map(|(first, second)| (
             first.parse::<u64>().expect("Could not create ans value"),
@@ -25,10 +26,10 @@ fn to_ans_and_operands(input: & str) -> impl Iterator<Item = (u64, Vec<u64>)> + 
         )
 }
 
-fn can_be_created(ans: &u64, operands: &[u64], basis: Vec<char>) -> bool {
-    let operator_sequences = basis.permutations_with_replacement(operands.len() - 1);
+fn can_be_created(ans: &u64, operands: &[u64], basis: &[char]) -> bool {
+    let mut operator_sequences = repeat_n(basis, operands.len() - 1).multi_cartesian_product();
 
-    for operator_sequence in operator_sequences {
+    operator_sequences.any(|operator_sequence| {
         let mut product_sum = *operands.first().unwrap();
         for (index, operand) in operands.iter().skip(1).enumerate() {
             match operator_sequence.get(index) {
@@ -38,34 +39,12 @@ fn can_be_created(ans: &u64, operands: &[u64], basis: Vec<char>) -> bool {
                 _ => unreachable!()
             }
         }
-        if product_sum == *ans {
-            return true
-        }
-    }
-    false
+        product_sum == *ans
+    })
 }
 
 fn concat(a: u64, b: u64) -> u64 {
     a * 10u64.pow(b.ilog10() + 1) + b
-}
-
-trait PermutationsWithReplacement {
-    fn permutations_with_replacement(&self, k: usize) -> Vec<Self> where Self: Sized;
-}
-
-impl PermutationsWithReplacement for Vec<char> {
-    fn permutations_with_replacement(&self, k: usize) -> Vec<Self> {
-        (0..=k - 1).map(|_| 0..=self.len() - 1)
-            .multi_cartesian_product()
-            .map(|permutation|
-                permutation
-                    .into_iter()
-                    .map(|index| self.get(index).expect("Could not access basis"))
-                    .cloned()
-                    .collect()
-            )
-            .collect::<Vec<Vec<char>>>()
-    }
 }
 
 #[test]
