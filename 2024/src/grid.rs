@@ -86,24 +86,13 @@ impl Grid {
     }
     
     pub fn find(&self, c: char) -> Option<Position> {
-        for row in 0..self.height {
-            for col in 0..self.width {
-                if self.data[row][col] == c { return Some(Position { x: col, y: row }) }
-            }
-        }
-        None
+        self.find_iterator(c).next()
     }
-    
-    pub fn find_all(&self, c: char) -> Vec<Position> {
-        let mut hits = Vec::<Position>::new();
-        for row in 0..self.height {
-            for col in 0..self.width {
-                if self.data[row][col] == c {
-                    hits.push(Position { x: col, y: row })
-                }
-            }
-        }
-        hits
+
+    pub fn find_iterator(&self, c: char) -> impl Iterator<Item = Position> + '_ {
+        self.iter()
+            .filter(move |&(_, value)| value == c)
+            .map(|(position, _)| position)
     }
     
     pub fn direction_vec(&self, position: Position, direction: Direction) -> Vec<Position> {
@@ -114,6 +103,14 @@ impl Grid {
             current_position = next_position;
         }
         positions
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (Position, char)> + '_ {
+        self.data.iter().enumerate().flat_map(move |(row_index, row)| {
+            row.iter().enumerate().map(move |(col_index, &value)| {
+                (Position { x: col_index, y: row_index }, value)
+            })
+        })
     }
 }
 
