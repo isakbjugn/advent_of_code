@@ -31,6 +31,16 @@ impl Grid {
 
         Ok(Grid { height: rows.len(), width: rows[0].len(), data: rows })
     }
+    pub fn from_char(height: usize, width: usize, fill: char) -> Self {
+        let mut rows = Vec::new();
+
+        for _ in 0..height {
+            let row: Vec<char> = vec![fill; width];
+            rows.push(row);
+        }
+
+        Grid { height: rows.len(), width: rows[0].len(), data: rows }
+    }
     fn valid_position(&self, position: &Position) -> bool {
         position.x < self.width && position.y < self.height
     }
@@ -82,6 +92,18 @@ impl Grid {
             }
         }
         None
+    }
+    
+    pub fn find_all(&self, c: char) -> Vec<Position> {
+        let mut hits = Vec::<Position>::new();
+        for row in 0..self.height {
+            for col in 0..self.width {
+                if self.data[row][col] == c {
+                    hits.push(Position { x: col, y: row })
+                }
+            }
+        }
+        hits
     }
     
     pub fn direction_vec(&self, position: Position, direction: Direction) -> Vec<Position> {
