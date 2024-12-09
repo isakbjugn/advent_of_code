@@ -2,8 +2,8 @@ use crate::grid::Grid;
 use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
-    let antennas = Grid::new(input).expect("Could not parse antennas to grid");
-    let mut antinodes = Grid::from_char(antennas.height, antennas.width, '.');
+    let antennas = Grid::from_str(input).expect("Could not parse antennas to grid");
+    let mut antinodes = Grid::new(antennas.height(), antennas.width(), '.');
     
     antennas.iter()
         .filter(|&(_, value)| value != '.')
@@ -12,8 +12,8 @@ pub fn part_1(input: &str) -> usize {
                 .filter(|&other_antenna| other_antenna != antenna)
                 .for_each(|other_antenna| {
                     if let Some(antinode) = get_antinode(&antenna, &other_antenna) {
-                        if antennas.get_value(&antinode).is_some() {
-                            antinodes.data[antinode.y][antinode.x] = '#';
+                        if antennas.get(&antinode).is_some() {
+                            antinodes.set(antinode, '#');
                         }
                     }
                 });
@@ -33,8 +33,8 @@ fn get_antinode(antenna: &Position, other_antenna: &Position) -> Option<Position
 }
 
 pub fn part_2(input: &str) -> usize {
-    let antennas = Grid::new(input).expect("Could not parse antennas to grid");
-    let mut antinodes = Grid::from_char(antennas.height, antennas.width, '.');
+    let antennas = Grid::from_str(input).expect("Could not parse antennas to grid");
+    let mut antinodes = Grid::new(antennas.height(), antennas.width(), '.');
 
     antennas.iter()
         .filter(|&(_, value)| value != '.')
@@ -42,8 +42,8 @@ pub fn part_2(input: &str) -> usize {
             antennas.find_iterator(frequency)
                 .filter(|&other_antenna| other_antenna != antenna)
                 .for_each(|other_antenna| {
-                    for antinode in get_antinodes(&antenna, &other_antenna, antennas.width, antennas.height) {
-                        antinodes.data[antinode.y][antinode.x] = '#';
+                    for antinode in get_antinodes(&antenna, &other_antenna, antennas.width(), antennas.height()) {
+                        antinodes.set(antinode, '#');
                     }
                 });
         });
