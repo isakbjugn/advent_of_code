@@ -11,14 +11,13 @@ pub fn part_1(input: &str) -> usize {
         .count()
 }
 
-fn find_peaks(trailhead: &Position, map: &Grid) -> HashSet<Position> {
-    match map.get(trailhead) {
+fn find_peaks(position: &Position, map: &Grid) -> HashSet<Position> {
+    match map.get(position) {
         None => unreachable!("No valid current value"),
-        Some('9') => HashSet::from([*trailhead]),
+        Some('9') => HashSet::from([*position]),
         Some(value) => {
             let height = value.to_digit(10).expect("Could not parse to height");
-            map.possible_directions(*trailhead).into_iter()
-                .map(|direction| map.next_position(trailhead, direction).expect("No valid next position"))
+            map.neighbor_iter(position)
                 .filter(|next_position| map.get(next_position).expect("No valid next value").to_digit(10).expect("Could not parse next value to height") == height + 1)
                 .map(|next_position| find_peaks(&next_position, map))
                 .flat_map(|set| set.into_iter())
@@ -35,14 +34,13 @@ pub fn part_2(input: &str) -> usize {
         .sum()
 }
 
-fn count_peaks(trailhead: &Position, map: &Grid) -> usize {
-    match map.get(trailhead) {
+fn count_peaks(position: &Position, map: &Grid) -> usize {
+    match map.get(position) {
         None => unreachable!("No valid current value"),
         Some('9') => 1,
         Some(value) => {
             let height = value.to_digit(10).expect("Could not parse to height");
-            map.possible_directions(*trailhead).into_iter()
-                .map(|direction| map.next_position(trailhead, direction).expect("No valid next position"))
+            map.neighbor_iter(position)
                 .filter(|next_position| map.get(next_position).expect("No valid next value").to_digit(10).expect("Could not parse next value to height") == height + 1)
                 .map(|next_position| count_peaks(&next_position, map))
                 .sum()
