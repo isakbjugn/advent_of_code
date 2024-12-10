@@ -79,7 +79,16 @@ impl Grid {
         }
     }
     
-    pub fn possible_directions(&self, position: Position) -> Vec<Direction> {
+    pub fn neighbor_iter<'a>(&'a self, position: &'a Position) -> impl Iterator<Item = Position> + 'a {
+        self.possible_directions(position)
+            .into_iter()
+            .map(|possible_direction|
+                self.next_position(position, possible_direction)
+                    .expect("Should be valid position in possible_direction")
+            )
+    }
+    
+    fn possible_directions(&self, position: &Position) -> Vec<Direction> {
         let mut directions = Vec::new();
         if position.y > 0 {
             directions.push(Direction::North);
