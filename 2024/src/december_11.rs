@@ -1,28 +1,13 @@
+use std::collections::HashMap;
 
-pub fn part_1(input: &str) -> usize {
-    let mut line: Vec<u64> = input.split_whitespace()
+pub fn part_1(input: &str) -> u64 {
+    let line: Vec<u64> = input.split_whitespace()
         .map(|c| c.parse::<u64>().expect("Could not input to integers"))
         .collect();
     
-    let mut new_line = Vec::<u64>::new();
-    for _ in 0..25 {
-        new_line = Vec::<u64>::new();
-        for stone in line {
-            match stone {
-                0 => new_line.push(1),
-                number if has_even_digits(number) => {
-                    if let Some((first, second)) = split_even_digits(number) {
-                        new_line.push(first);
-                        new_line.push(second);
-                    } else { panic!() }
-                },
-                number => new_line.push(number * 2024)
-            }
-        }
-        line = new_line;
-        // println!("{:?}", line);
-    }
-    line.len()
+    line.into_iter()
+        .map(|stone| search(stone, 25, &mut HashMap::new()))
+        .sum()
 }
 
 fn has_even_digits(number: u64) -> bool {
@@ -56,8 +41,35 @@ fn split_even_digits(n: u64) -> Option<(u64, u64)> {
     Some((first_half, second_half))
 }
 
-pub fn part_2(input: &str) -> usize {
-    0
+pub fn part_2(input: &str) -> u64 {
+    let line: Vec<u64> = input.split_whitespace()
+        .map(|c| c.parse::<u64>().expect("Could not input to integers"))
+        .collect();
+
+    line.into_iter()
+        .map(|stone| search(stone, 75, &mut HashMap::new()))
+        .sum()
+}
+
+fn search(stone: u64, iterations_left: u8, memo: &mut HashMap<(u64, u8), u64>) -> u64 {
+    if let Some(&result) = memo.get(&(stone, iterations_left)) {
+        return result
+    }
+    if iterations_left == 0 {
+        memo.insert((stone, 0), 1);
+        return 1
+    }
+    let result = match stone {
+        0 => search(1, iterations_left - 1, memo),
+        number if has_even_digits(number) => {
+            if let Some((first, second)) = split_even_digits(number) {
+                search(first, iterations_left - 1, memo) + search(second, iterations_left - 1, memo)
+            } else { panic!() }
+        },
+        number => search(number * 2024, iterations_left - 1, memo)
+    };
+    memo.insert((stone, iterations_left),  result);
+    result    
 }
 
 #[test]
