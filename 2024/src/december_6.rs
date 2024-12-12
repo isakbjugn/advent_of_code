@@ -24,18 +24,18 @@ pub fn part_1(input: &str) -> usize {
 pub fn part_2(input: &str) -> usize {
     let grid = Grid::from_str(input).expect("Unable to create Grid!");
     let mut position = grid.find('^').expect("Could not find starting position");
-    let mut visited = HashSet::<Position>::new();
+    let mut visited: Vec<Vec<bool>> = vec![vec![false; grid.width()]; grid.height()];
     let mut facing = Direction::North;
     let mut faced_obstacles: HashSet<(Position, Direction)> = HashSet::new();
     
     let mut should_check: Vec<(Position, Direction, HashSet<(Position, Direction)>)> = Vec::new();
 
     while let Some(next_position) = grid.next_position(&position, facing) {
-        visited.insert(position);
+        visited[position.y][position.x] = true;
         match grid.get(&next_position) {
             Some('.') | Some('^') => {
                 let next_position = grid.next_position(&position, facing).expect("Not valid value on grid!");
-                if !visited.contains(&next_position) {
+                if !visited[next_position.y][next_position.x] {
                     should_check.push((position, facing, faced_obstacles.clone()))
                 }
                 position = next_position;
