@@ -33,8 +33,12 @@ pub fn part_2(input: &str) -> usize {
         match grid.get(&next_position) {
             Some('.') | Some('^') => {
                 let next_position = grid.next_position(&position, facing).expect("Not valid value on grid!");
-                if !visited.contains(&next_position) && leads_to_loop(position, facing, &grid, faced_obstacles.clone()) {
-                    loop_positions.insert(next_position);
+                {
+                    let mut grid = grid.clone();
+                    grid.set(next_position, '#');
+                    if !visited.contains(&next_position) && leads_to_loop(position, facing, &grid, faced_obstacles.clone()) {
+                        loop_positions.insert(next_position);
+                    }
                 }
                 position = next_position;
             },
@@ -50,10 +54,6 @@ pub fn part_2(input: &str) -> usize {
 }
 
 fn leads_to_loop(mut position: Position, mut facing: Direction, grid: &Grid, mut faced_obstacles: HashSet<(Position, Direction)>) -> bool {
-    let next_position = grid.next_position(&position, facing).expect("Not valid value on grid!");
-    faced_obstacles.insert((next_position, facing));
-    facing = facing.clockwise();
-
     while let Some(next_cell) = grid.next_position(&position, facing) {
         if faced_obstacles.contains(&(next_cell, facing)) {
             return true
