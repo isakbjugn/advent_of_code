@@ -88,7 +88,7 @@ impl Grid {
             )
     }
     
-    fn possible_directions(&self, position: &Position) -> Vec<Direction> {
+    pub fn possible_directions(&self, position: &Position) -> Vec<Direction> {
         let mut directions = Vec::new();
         if position.y > 0 {
             directions.push(Direction::North);
