@@ -41,20 +41,19 @@ pub fn part_2(input: &str) -> usize {
                 grid
             };
             
-            let mut previous_positions_directions = HashSet::<(Position, Direction)>::new();
+            let mut faced_obstacles: HashSet<(Position, Direction)> = HashSet::new();
             
             let mut position = starting_position;
             let mut facing = starting_direction;
     
             while let Some(next_cell) = grid.next_position(&position, facing) {
-                if previous_positions_directions.contains(&(position, facing)) {
+                if faced_obstacles.contains(&(next_cell, facing)) {
                     return true
-                } else {
-                    previous_positions_directions.insert((position, facing));
                 }
                 
                 match grid.get(&next_cell) {
                     Some('#') => facing = {
+                        faced_obstacles.insert((next_cell, facing));
                         facing.rotate_clockwise()
                     },
                     Some('.') | Some('^') => {
