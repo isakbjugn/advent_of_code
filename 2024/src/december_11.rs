@@ -4,10 +4,38 @@ pub fn part_1(input: &str) -> u64 {
     let line: Vec<u64> = input.split_whitespace()
         .map(|c| c.parse::<u64>().expect("Could not input to integers"))
         .collect();
-    
+
     line.into_iter()
         .map(|stone| search(stone, 25, &mut HashMap::new()))
         .sum()
+}
+
+fn count_digits(number: u64) -> u32 {
+    number.ilog10() + 1
+}
+
+fn split(number: u64, digits: u32) -> (u64, u64) {
+    let divisor = 10_u64.pow(digits / 2);
+
+    let first = number / divisor;
+    let second = number % divisor;
+
+    (first, second)
+}
+
+fn split_old(number: u64) -> (Option<u64>, Option<u64>) {
+    match number.checked_ilog10().map(|digits| digits + 1) {
+        None => (Some(number), None),
+        Some(digits) if digits % 2 == 0 => {
+            let divisor = 10_u64.pow(digits / 2);
+
+            let first = digits as u64 / divisor;
+            let second = digits as u64 % divisor;
+
+            (Some(first), Some(second))
+        },
+        Some(_) => (Some(number), None)
+    }
 }
 
 fn has_even_digits(number: u64) -> bool {
@@ -59,8 +87,11 @@ fn search(stone: u64, iterations_left: u8, memo: &mut HashMap<(u64, u8), u64>) -
         memo.insert((stone, 0), 1);
         return 1
     }
-    let result = match stone {
-        0 => search(1, iterations_left - 1, memo),
+    let result = match (stone, count_digits(stone)) {
+        (0, _) => search(1, iterations_left - 1, memo),
+        (number, digits) if digits % 2 == 0 => {
+            
+        }
         number if has_even_digits(number) => {
             if let Some((first, second)) = split_even_digits(number) {
                 search(first, iterations_left - 1, memo) + search(second, iterations_left - 1, memo)
@@ -69,7 +100,7 @@ fn search(stone: u64, iterations_left: u8, memo: &mut HashMap<(u64, u8), u64>) -
         number => search(number * 2024, iterations_left - 1, memo)
     };
     memo.insert((stone, iterations_left),  result);
-    result    
+    result
 }
 
 #[test]
@@ -81,7 +112,7 @@ fn sample_input_part_1() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_11.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 65601038650482)
 }
 
 #[test]
@@ -93,5 +124,5 @@ fn input_part_1() {
 #[test]
 fn input_part_2() {
     let input = include_str!("../input/input_11.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 264350935776416)
 }
