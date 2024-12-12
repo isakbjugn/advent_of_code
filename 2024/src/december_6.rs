@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use rayon::prelude::*;
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::position::Position;
@@ -26,19 +27,16 @@ pub fn part_2(input: &str) -> usize {
     let mut visited = HashSet::<Position>::new();
     let mut facing = Direction::North;
     let mut faced_obstacles: HashSet<(Position, Direction)> = HashSet::new();
-    let mut loop_positions: HashSet<Position> = HashSet::new();
+    
+    let mut should_check: Vec<(Position, Direction, HashSet<(Position, Direction)>)> = Vec::new();
 
     while let Some(next_position) = grid.next_position(&position, facing) {
         visited.insert(position);
         match grid.get(&next_position) {
             Some('.') | Some('^') => {
                 let next_position = grid.next_position(&position, facing).expect("Not valid value on grid!");
-                {
-                    let mut grid = grid.clone();
-                    grid.set(next_position, '#');
-                    if !visited.contains(&next_position) && leads_to_loop(position, facing, &grid, faced_obstacles.clone()) {
-                        loop_positions.insert(next_position);
-                    }
+                if !visited.contains(&next_position) {
+                    should_check.push((position, facing, faced_obstacles.clone()))
                 }
                 position = next_position;
             },
@@ -50,7 +48,15 @@ pub fn part_2(input: &str) -> usize {
             _  => unreachable!()
         }
     }
-    loop_positions.len()
+    
+    should_check.into_par_iter()
+        .filter(|args| {
+            let next_position = grid.next_position(&args.0, args.1).expect("Should be valid next position");
+            let mut grid = grid.clone();
+            grid.set(next_position, '#');
+            leads_to_loop(args.0, args.1, &grid, args.2.clone())
+        })
+        .count()
 }
 
 fn leads_to_loop(mut position: Position, mut facing: Direction, grid: &Grid, mut faced_obstacles: HashSet<(Position, Direction)>) -> bool {
