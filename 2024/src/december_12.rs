@@ -17,7 +17,7 @@ fn find_contiguous_groups(garden: &Grid) -> Vec<HashSet<Position>> {
     let mut groups: Vec<HashSet<Position>> = Vec::new();
 
     for (start_position, group_plant) in garden.iter() {
-        if groups.iter().any(|set| set.iter().contains(&start_position)) {
+        if groups.iter().any(|set| set.contains(&start_position)) {
             continue
         }
         let mut group: HashSet::<Position> = HashSet::new();
@@ -73,7 +73,7 @@ fn calculate_sides(group: HashSet<Position>, garden: &Grid) -> usize {
 
     let mut sides: Vec<HashSet<(Position, Direction)>> = vec![];
     for face in faces.iter() {
-        if sides.iter().any(|set| set.iter().contains(face)) {
+        if sides.iter().any(|set| set.contains(face)) {
             continue
         }
         let side_direction = face.1;

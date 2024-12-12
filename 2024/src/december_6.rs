@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use itertools::Itertools;
+use rayon::prelude::*;
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::position::Position;
@@ -32,37 +33,38 @@ pub fn part_2(input: &str) -> usize {
     let starting_position = grid.find('^').expect("Could not find starting position");
     let starting_direction = Direction::North;
     
-    visited.into_iter().filter(|position| {
-        let grid = {
-            let mut grid = grid.clone();
-            grid.set(*position, '#');
-            grid
-        };
-        
-        let mut previous_positions_directions = HashSet::<(Position, Direction)>::new();
-        
-        let mut position = starting_position;
-        let mut facing = starting_direction;
-
-        while let Some(next_cell) = grid.next_position(&position, facing) {
-            if previous_positions_directions.iter().contains(&(position, facing)) {
-                return true
-            } else {
-                previous_positions_directions.insert((position, facing));
-            }
+    visited.into_par_iter()
+        .filter(|position| {
+            let grid = {
+                let mut grid = grid.clone();
+                grid.set(*position, '#');
+                grid
+            };
             
-            match grid.get(&next_cell) {
-                Some('#') => facing = {
-                    facing.rotate_clockwise()
-                },
-                Some('.') | Some('^') => {
-                    position = next_cell;
+            let mut previous_positions_directions = HashSet::<(Position, Direction)>::new();
+            
+            let mut position = starting_position;
+            let mut facing = starting_direction;
+    
+            while let Some(next_cell) = grid.next_position(&position, facing) {
+                if previous_positions_directions.contains(&(position, facing)) {
+                    return true
+                } else {
+                    previous_positions_directions.insert((position, facing));
                 }
-                _ => { unreachable!() }
+                
+                match grid.get(&next_cell) {
+                    Some('#') => facing = {
+                        facing.rotate_clockwise()
+                    },
+                    Some('.') | Some('^') => {
+                        position = next_cell;
+                    }
+                    _ => { unreachable!() }
+                }
             }
-        }
-        false
-    }).count()
+            false
+        }).count()
 }
 
 #[test]

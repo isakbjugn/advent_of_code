@@ -1,4 +1,5 @@
 use std::{env::args, fs::read_to_string};
+use took::Timer;
 
 mod position;
 mod direction;
@@ -22,6 +23,7 @@ fn main() {
     let path = format!("input/input_{}.txt", day);
     let input = read_to_string(path).unwrap();
 
+    let timer = Timer::new();
     #[cfg_attr(rustfmt, rustfmt_skip)]
     match day.as_str() {
         "1" => {
@@ -74,4 +76,5 @@ fn main() {
         }
         _ => ()
     }
+    println!("Finished in {}", timer.took());
 }
