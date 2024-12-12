@@ -1,5 +1,6 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
+use itertools::Itertools;
 use crate::direction::Direction;
 use crate::position::Position;
 
@@ -131,6 +132,10 @@ impl Grid {
                 (Position { x: col_index, y: row_index }, value)
             })
         })
+    }
+    
+    pub fn are_neighbors(&self, a: &Position, b: &Position) -> bool {
+        self.neighbor_iter(a).contains(b)
     }
 }
 
