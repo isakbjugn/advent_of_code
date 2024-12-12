@@ -5,13 +5,13 @@ use crate::position::Position;
 
 #[derive(Eq, Clone)]
 pub struct Grid {
-    pub data: Vec<Vec<char>>,
-    pub height: usize,
-    pub width: usize,
+    data: Vec<Vec<char>>,
+    height: usize,
+    width: usize,
 }
 
 impl Grid {
-    pub fn new(input: &str) -> Result<Self, String> {
+    pub fn from_str(input: &str) -> Result<Self, String> {
         let mut rows = Vec::new();
 
         for line in input.lines() {
@@ -31,7 +31,8 @@ impl Grid {
 
         Ok(Grid { height: rows.len(), width: rows[0].len(), data: rows })
     }
-    pub fn from_char(height: usize, width: usize, fill: char) -> Self {
+    
+    pub fn new(height: usize, width: usize, fill: char) -> Self {
         let mut rows = Vec::new();
 
         for _ in 0..height {
@@ -41,33 +42,43 @@ impl Grid {
 
         Grid { height: rows.len(), width: rows[0].len(), data: rows }
     }
-    fn valid_position(&self, position: &Position) -> bool {
-        position.x < self.width && position.y < self.height
-    }
-    pub fn get_value(&self, position: &Position) -> Option<char> {
-        if self.valid_position(position) {
+    
+    pub fn get(&self, position: &Position) -> Option<char> {
+        if position.x < self.width && position.y < self.height {
             Some(self.data[position.y][position.x])
         } else {
             None
         }
     }
-    pub fn next_value(&self, position: &Position, direction: Direction) -> Option<char> {
-        self.neighbor_in_direction(position.x, position.y, direction)
-            .map(|next_cell| self.data[next_cell.1][next_cell.0])
+    
+    pub fn height(&self) -> usize { self.height }
+
+    pub fn width(&self) -> usize { self.width }
+    
+    pub fn set(&mut self, position: Position, value: char) {
+        if position.x < self.width && position.y < self.height {
+            self.data[position.y][position.x] = value;
+        } else {
+            panic!("Trying to set value outside grid!")
+        }
     }
-    fn neighbor_in_direction(&self, x: usize, y: usize, direction: Direction) -> Option<(usize, usize)> {
+    
+    pub fn next_value(&self, position: &Position, direction: Direction) -> Option<char> {
+        self.next_position(position, direction)
+            .map(|next_cell| self.get(&next_cell))?
+    }
+    
+    pub fn next_position(&self, position: &Position, direction: Direction) -> Option<Position> {
+        let Position { x, y } = *position;
         match direction {
-            Direction::North if y > 0 => Some((x, y - 1)),
-            Direction::South if y < self.height - 1 => Some((x, y + 1)),
-            Direction::East if x < self.width - 1 => Some((x + 1, y)),
-            Direction::West if x > 0 => Some((x - 1, y)),
+            Direction::North if y > 0 => Some(Position { x, y: y - 1 }),
+            Direction::South if y < self.height - 1 => Some(Position { x, y: y + 1 }),
+            Direction::East if x < self.width - 1 => Some(Position { x: x + 1, y }),
+            Direction::West if x > 0 => Some(Position { x: x - 1, y }),
             _ => None,
         }
     }
-    pub fn next_position(&self, position: Position, direction: Direction) -> Option<Position> {
-        // use the existing neighbor_in_direction implementation
-        self.neighbor_in_direction(position.x, position.y, direction).map(|(x, y)| Position { x, y })
-    }
+    
     pub fn possible_directions(&self, position: Position) -> Vec<Direction> {
         let mut directions = Vec::new();
         if position.y > 0 {
@@ -98,7 +109,7 @@ impl Grid {
     pub fn direction_vec(&self, position: Position, direction: Direction) -> Vec<Position> {
         let mut positions = Vec::new();
         let mut current_position = position;
-        while let Some(next_position) = self.next_position(current_position, direction) {
+        while let Some(next_position) = self.next_position(&current_position, direction) {
             positions.push(next_position);
             current_position = next_position;
         }
