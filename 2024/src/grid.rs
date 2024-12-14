@@ -60,6 +60,7 @@ impl Grid {
         if position.x < self.width && position.y < self.height {
             self.data[position.y][position.x] = value;
         } else {
+            println!("Trying to set position {:?}, but grid is {}x{}", position, self.width, self.height);
             panic!("Trying to set value outside grid!")
         }
     }
