@@ -9,7 +9,7 @@ pub fn part_1(input: &str) -> u32 {
     let mut warehouse = Grid::from_str(warehouse_str).expect("Could not create warehouse grid");
     let movements: Vec<char> = movements_str.split_whitespace().flat_map(|string| string.chars()).collect();
 
-    'movement: for movement in movements {
+    for movement in movements {
         let robot_position = warehouse.find('@').expect("No current robot position");
         let direction = match movement {
             '^' => Direction::North,
@@ -96,31 +96,25 @@ fn find_crates_to_move(warehouse: &Grid, position: Position, direction: Directio
     let mut crates_to_move = Vec::new();
     
     for tile in direction_vec {
-        match (warehouse.next_value(&tile, direction), direction) {
-            (Some('O'), _) => crates_to_move.push(tile),
-            (Some('.'), _) => { crates_to_move.push(tile); break },
-            (Some('#'), _) => return Path::Blocked,
-            (Some('['), Direction::North) |
-            (Some('['), Direction::South) => {
+        match warehouse.next_value(&tile, direction) {
+            Some('O') => crates_to_move.push(tile),
+            Some('.') => { crates_to_move.push(tile); break },
+            Some('#') => return Path::Blocked,
+            Some('[') | Some(']') => {
                 crates_to_move.push(tile);
-                let next_tile = warehouse.next_position(&tile, direction).unwrap();
-                let other_crate_edge = warehouse.next_position(&next_tile, Direction::East).unwrap();
-                match find_crates_to_move(warehouse, other_crate_edge, direction) {
-                    Path::Open(path) => path.into_iter().for_each(|tile| crates_to_move.push(tile)),
-                    Path::Blocked => return Path::Blocked,
+                if matches!(direction, Direction::North | Direction::South) {
+                    let next_tile = warehouse.next_position(&tile, direction).unwrap();
+                    let other_crate_edge = match warehouse.next_value(&tile, direction) {
+                        Some('[') => warehouse.next_position(&next_tile, Direction::East).unwrap(),
+                        Some(']') => warehouse.next_position(&next_tile, Direction::West).unwrap(),
+                        _ => unreachable!("Invalid crate edge direction"),
+                    };
+                    match find_crates_to_move(warehouse, other_crate_edge, direction) {
+                        Path::Open(path) => crates_to_move.extend(path),
+                        Path::Blocked => return Path::Blocked,
+                    }
                 }
-            }
-            (Some(']'), Direction::North) |
-            (Some(']'), Direction::South) => {
-                crates_to_move.push(tile);
-                let next_tile = warehouse.next_position(&tile, direction).unwrap();
-                let other_crate_edge = warehouse.next_position(&next_tile, Direction::West).unwrap();
-                match find_crates_to_move(warehouse, other_crate_edge, direction) {
-                    Path::Open(path) => path.into_iter().for_each(|tile| crates_to_move.push(tile)),
-                    Path::Blocked => return Path::Blocked,
-                }
-            }
-            (Some('['), _) | (Some(']'), _) => crates_to_move.push(tile),
+            },
             _ => unreachable!("How did it come to this, this time?")
         }
     }
