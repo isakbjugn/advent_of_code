@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use itertools::Itertools;
 use crate::direction::Direction;
 use crate::grid::Grid;
@@ -71,19 +72,10 @@ pub fn part_2(input: &str) -> u32 {
 
         if let Path::Open(crates_to_move) = find_crates_to_move(&warehouse, robot_position, direction) {
             if (1..crates_to_move.len()).any(|i| crates_to_move[i..].contains(&crates_to_move[i - 1])) {
-                // println!("Var duplikater: {:?}", crates_to_move);
                 let sorted: Vec<Position> = crates_to_move.clone().into_iter()
                     .unique()
-                    .sorted_by(|position_a, position_b| {
-                        match direction {
-                            Direction::North => position_a.y.cmp(&position_b.y),
-                            Direction::South => position_b.y.cmp(&position_a.y),
-                            Direction::East => position_b.x.cmp(&position_a.x),
-                            Direction::West => position_a.x.cmp(&position_b.x),
-                        }
-                    })
+                    .sorted_by(|a, b| sort_by_direction(a, b, direction))
                     .collect();
-                // println!("Sorted: {:?}", sorted);
                 for tile in sorted.into_iter() {
                     let value = warehouse.get(&tile).expect("No valid current value");
                     let next_tile = warehouse.next_position(&tile, direction).expect("No valid next tile");
@@ -102,6 +94,15 @@ pub fn part_2(input: &str) -> u32 {
     }
 
     calculate_gps(&warehouse, '[')
+}
+
+fn sort_by_direction(rhs: &Position, lhs: &Position, direction: Direction) -> Ordering {
+    match direction {
+        Direction::North => rhs.y.cmp(&lhs.y),
+        Direction::South => lhs.y.cmp(&rhs.y),
+        Direction::East => lhs.x.cmp(&rhs.x),
+        Direction::West => rhs.x.cmp(&lhs.x),
+    }
 }
 
 enum Path {
