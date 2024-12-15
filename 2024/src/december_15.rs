@@ -18,25 +18,15 @@ pub fn part_1(input: &str) -> u32 {
             '<' => Direction::West,
             _ => unreachable!()
         };
-        let direction_vec: Vec<Position> = [robot_position].iter().chain(warehouse.direction_vec(robot_position, direction).iter()).cloned().collect();
-
-        let mut tiles_to_be_moved = Vec::new();
-        'direction: for tile in direction_vec.iter() {
-            match warehouse.next_value(tile, direction) {
-                Some('O') => { tiles_to_be_moved.push(tile) },
-                Some('.') => { tiles_to_be_moved.push(tile); break 'direction; },
-                Some('#') => { continue 'movement },
-                None => unreachable!("How did it come to this?"),
-                _ => unreachable!("What on earth could this be?"),
+        
+        if let Path::Open(crates_to_move) = find_crates_to_move(&warehouse, robot_position, direction) {
+            for tile in crates_to_move.into_iter().rev() {
+                let value = warehouse.get(&tile).expect("No valid current value");
+                let next_tile = warehouse.next_position(&tile, direction).expect("No valid next tile");
+                warehouse.set(next_tile, value);
             }
+            warehouse.set(robot_position, '.');
         }
-
-        for tile in tiles_to_be_moved.into_iter().rev() {
-            let value = warehouse.get(tile).expect("No valid current value");
-            let next_tile = warehouse.next_position(tile, direction).expect("No valid next tile");
-            warehouse.set(next_tile, value);
-        }
-        warehouse.set(robot_position, '.');
     }
 
     calculate_gps(&warehouse, 'O')
@@ -107,6 +97,7 @@ fn find_crates_to_move(warehouse: &Grid, position: Position, direction: Directio
     
     for tile in direction_vec {
         match (warehouse.next_value(&tile, direction), direction) {
+            (Some('O'), _) => crates_to_move.push(tile),
             (Some('.'), _) => { crates_to_move.push(tile); break },
             (Some('#'), _) => return Path::Blocked,
             (Some('['), Direction::North) |
