@@ -38,11 +38,13 @@ pub fn part_1(input: &str) -> u32 {
         warehouse.set(robot_position, '.');
     }
 
-    calculate_gps(&warehouse)
+    calculate_gps(&warehouse, 'O')
 }
 
-fn calculate_gps(warehouse: &Grid) -> u32 {
-    warehouse.find_iterator('O').map(|Position { x, y}| 100 * y as u32 + x as u32).sum()
+fn calculate_gps(warehouse: &Grid, crate_symbol: char) -> u32 {
+    warehouse.find_iterator(crate_symbol)
+        .map(|Position { x, y}| 100 * y as u32 + x as u32)
+        .sum()
 }
 
 pub fn part_2(input: &str) -> u32 {
@@ -54,12 +56,10 @@ pub fn part_2(input: &str) -> u32 {
         .replace('@', "@.");
     
     let mut warehouse = Grid::from_str(&larger_warehouse_str).expect("Could not create warehouse grid");
-    // println!("Starting warehouse:\n{}", warehouse);
     
     let movements: Vec<char> = movements_str.split_whitespace().flat_map(|string| string.chars()).collect();
 
-    for (movement_number, movement) in movements.into_iter().enumerate() {
-        // println!("Current move: {}", movement);
+    for movement in movements.into_iter() {
         let robot_position = warehouse.find('@').expect("No current robot position");
         let direction = match movement {
             '^' => Direction::North,
@@ -99,10 +99,9 @@ pub fn part_2(input: &str) -> u32 {
                 }
             }
         }
-        // println!("{}", warehouse);
     }
 
-    calculate_larger_gps(&warehouse)
+    calculate_gps(&warehouse, '[')
 }
 
 enum Path {
@@ -143,17 +142,6 @@ fn find_crates_to_move(warehouse: &Grid, position: Position, direction: Directio
         }
     }
     Path::Open(crates_to_move)
-}
-
-fn calculate_larger_gps(warehouse: &Grid) -> u32 {
-    warehouse.find_iterator('[')
-        .map(|Position { x, y}| {
-            100 * y as u32 + x as u32
-            // match x < (warehouse.width() - 1) / 2 {
-            //     true => 100 * y as u32 + x as u32,
-            //     false => 100 * y as u32 + x as u32 - 1,
-            // }
-        }).sum()
 }
 
 #[test]
