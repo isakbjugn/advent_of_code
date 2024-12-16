@@ -23,4 +23,10 @@ impl Direction {
             Direction::East => Direction::North,
         }
     }
+    pub fn perpendicular(&self) -> (Direction, Direction) {
+        match self {
+            Direction::North | Direction::South => (Direction::East, Direction::West),
+            Direction::East | Direction::West => (Direction::South, Direction::North),
+        }
+    }
 }
