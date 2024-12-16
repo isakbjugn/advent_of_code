@@ -1,13 +1,17 @@
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
+use itertools::Itertools;
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
     let maze = Grid::from_str(input).expect("Could not create maze");
-    
     maze.a_star_search().expect("Should be a valid path")
+}
+
+pub fn part_2(input: &str) -> usize {
+    0
 }
 
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
@@ -39,13 +43,19 @@ impl PartialOrd for AStarState {
 }
 
 impl Grid {
+    fn next_vertices(&self, position: Position, direction: Direction) -> Vec<(Position, Direction, usize)> {
+        match self.next_value(&position, direction) {
+            Some('#') => vec![(position, direction.clockwise(), 1000), (position, direction.counter_clockwise(), 1000)],
+            Some(_) => vec![(self.next_position(&position, direction).unwrap(), direction, 1), (position, direction.clockwise(), 1000), (position, direction.counter_clockwise(), 1000)],
+            _ => unreachable!("Should never check past walls")
+        }
+    }
     fn is_goal_state(&self, vertex: &Vertex) -> bool {
         self.find('E').expect("Must be an end") == vertex.position
     }
     fn a_star_search(&self) -> Option<usize> {
         let mut heap = BinaryHeap::new();
         let mut distances = HashMap::new();
-        let mut optimal_cost = None;
 
         let start_pos = self.find('S').expect("Must be a start position");
         heap.push(AStarState {
@@ -58,12 +68,10 @@ impl Grid {
             }
         });
 
+
         while let Some(AStarState { cost, vertex, .. }) = heap.pop() {
             if self.is_goal_state(&vertex) {
-                if optimal_cost.is_none() {
-                    optimal_cost = Some(cost)
-                }
-                continue;
+                return Some(cost)
             }
 
             if let Some(&d) = distances.get(&vertex) {
@@ -74,62 +82,13 @@ impl Grid {
 
             distances.insert(vertex.clone(), cost);
             
-            // Three possible choices:
-            // 1. continue in current direction,
-            let direction = vertex.direction;
-            if let Some(neighbor) = self.next_position(&vertex.position, direction) {
-                if self.get(&neighbor) != Some('#') {
-                    let new_cost = cost + 1;
-                    let estimated_total_cost = new_cost + self.manhattan_distance(neighbor);
-                    let new_vertex = Vertex {
-                        position: neighbor,
-                        direction: direction,
-                        straight_path: count_straight_path(vertex.straight_path, vertex.direction, direction)
-                    };
-
-                    if !distances.contains_key(&new_vertex) || new_cost < distances[&new_vertex] {
-                        heap.push(AStarState {
-                            cost: new_cost,
-                            estimated_total_cost,
-                            vertex: new_vertex
-                        });
-                    }
-                }
-            }
-            
-            // 2. rotate clockwise,
-            {
-                let direction = vertex.direction.clockwise();
-                let same_tile_but_rotated = vertex.position;
-                
-                let new_cost = cost + 1000;
-                let estimated_total_cost = new_cost + self.manhattan_distance(same_tile_but_rotated);
+            for (next_position, next_direction, added_cost) in self.next_vertices(vertex.position, vertex.direction) {
+                let new_cost = cost + added_cost;
+                let estimated_total_cost = new_cost + self.manhattan_distance(next_position);
                 let new_vertex = Vertex {
-                    position: same_tile_but_rotated,
-                    direction: direction,
-                    straight_path: count_straight_path(vertex.straight_path, vertex.direction, direction)
-                };
-
-                if !distances.contains_key(&new_vertex) || new_cost < distances[&new_vertex] {
-                    heap.push(AStarState {
-                        cost: new_cost,
-                        estimated_total_cost,
-                        vertex: new_vertex
-                    });
-                }
-            }
-            
-            // 3. rotate counterclockwise
-            {
-                let direction = vertex.direction.counter_clockwise();
-                let same_tile_but_rotated = vertex.position;
-
-                let new_cost = cost + 1000;
-                let estimated_total_cost = new_cost + self.manhattan_distance(same_tile_but_rotated);
-                let new_vertex = Vertex {
-                    position: same_tile_but_rotated,
-                    direction: direction,
-                    straight_path: count_straight_path(vertex.straight_path, vertex.direction, direction)
+                    position: next_position,
+                    direction: next_direction,
+                    straight_path: count_straight_path(vertex.straight_path, vertex.direction, next_direction)
                 };
 
                 if !distances.contains_key(&new_vertex) || new_cost < distances[&new_vertex] {
@@ -142,7 +101,7 @@ impl Grid {
             }
         }
 
-        optimal_cost // No path found
+        None
     }
     fn manhattan_distance(&self, pos: Position) -> usize {
         let dx = self.width() - 1 - pos.x;
@@ -156,10 +115,6 @@ fn count_straight_path(straight_path: usize, previous_direction: Direction, new_
         true => straight_path + 1,
         false => 1,
     }
-}
-
-pub fn part_2(input: &str) -> u32 {
-    0
 }
 
 #[test]
@@ -177,13 +132,13 @@ fn sample_input_part_1_2() {
 #[test]
 fn sample_input_part_2_1() {
     let input = include_str!("../input/sample_16_1.txt");
-    assert_eq!(part_2(input), 45)
+    assert_eq!(part_2(input), 0)
 }
 
 #[test]
 fn sample_input_part_2_2() {
     let input = include_str!("../input/sample_16_2.txt");
-    assert_eq!(part_2(input), 64)
+    assert_eq!(part_2(input), 0)
 }
 
 #[test]
