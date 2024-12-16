@@ -45,6 +45,7 @@ impl Grid {
     fn a_star_search(&self) -> Option<usize> {
         let mut heap = BinaryHeap::new();
         let mut distances = HashMap::new();
+        let mut optimal_cost = None;
 
         let start_pos = self.find('S').expect("Must be a start position");
         heap.push(AStarState {
@@ -59,7 +60,10 @@ impl Grid {
 
         while let Some(AStarState { cost, vertex, .. }) = heap.pop() {
             if self.is_goal_state(&vertex) {
-                return Some(cost);
+                if optimal_cost.is_none() {
+                    optimal_cost = Some(cost)
+                }
+                continue;
             }
 
             if let Some(&d) = distances.get(&vertex) {
@@ -138,7 +142,7 @@ impl Grid {
             }
         }
 
-        None // No path found
+        optimal_cost // No path found
     }
     fn manhattan_distance(&self, pos: Position) -> usize {
         let dx = self.width() - 1 - pos.x;
@@ -173,13 +177,13 @@ fn sample_input_part_1_2() {
 #[test]
 fn sample_input_part_2_1() {
     let input = include_str!("../input/sample_16_1.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 45)
 }
 
 #[test]
 fn sample_input_part_2_2() {
     let input = include_str!("../input/sample_16_2.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 64)
 }
 
 #[test]
