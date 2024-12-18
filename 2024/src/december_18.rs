@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
-use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::position::Position;
 
@@ -12,8 +11,26 @@ pub fn part_1(input: &str, width: usize, height: usize, bytes: usize) -> usize {
         .map(|(x, y)| Position { x: x.parse::<usize>().unwrap(), y: y.parse::<usize>().unwrap() } )
         .for_each(|position| memory.set(position, '#'));
     
-    println!("{}", memory);
     memory.a_star_search_18().expect("Should be a shortest path")
+}
+
+pub fn part_2(input: &str, width: usize, height: usize, start_bytes: usize) -> String {
+    let mut memory = Grid::new(width, height, '.');
+    let bytes: Vec<Position> = input.lines()
+        .map(|line| line.split_once(',').expect("Falling bytes have commas"))
+        .map(|(x, y)| Position { x: x.parse::<usize>().unwrap(), y: y.parse::<usize>().unwrap() } )
+        .collect();
+    bytes.iter().take(start_bytes)
+        .for_each(|position| memory.set(*position, '#'));
+    
+    for byte in bytes.into_iter().skip(start_bytes) {
+        memory.set(byte, '#');
+        match memory.a_star_search_18() {
+            Some(_) => continue,
+            None => return format!("{},{}", byte.x, byte.y)
+        }
+    }
+    String::new()
 }
 
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
@@ -99,10 +116,6 @@ impl Grid {
     }
 }
 
-pub fn part_2(input: &str) -> u32 {
-    0
-}
-
 #[test]
 fn sample_input_part_1() {
     let input = include_str!("../input/sample_18.txt");
@@ -112,7 +125,7 @@ fn sample_input_part_1() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_18.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input, 7, 7, 12), "6,1")
 }
 
 #[test]
@@ -124,5 +137,5 @@ fn input_part_1() {
 #[test]
 fn input_part_2() {
     let input = include_str!("../input/input_18.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input, 71, 71, 1024), "56,8")
 }
