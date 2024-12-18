@@ -6,34 +6,48 @@ pub fn part_1(input: &str) -> String {
     cpu.read_out()
 }
 
+pub fn part_2(input: &str) -> u64 {
+    let mut cpu = CPU::from_input(input).expect("Unable to parse input to CPU");
+
+    for register_a in (190593300000000..190593318000000) {
+        cpu.reset();
+        cpu.registers.a = register_a;
+        cpu.run();
+        if cpu.read_out() == cpu.read_program() {
+            return register_a
+        }
+    }
+    0
+}
+
 struct CPU {
     registers: Registers,
-    instruction_pointer: u32,
-    program: Vec<u32>,
-    out: Vec<u32>
+    instruction_pointer: u64,
+    program: Vec<u64>,
+    out: Vec<u64>
 }
 
 impl CPU {
     pub fn from_input(input: &str) -> Option<CPU> {
         let (registers_str, program_str) = input.split_once("\n\n")?;
-        let reg_values: Vec<u32> = registers_str
+        let reg_values: Vec<u64> = registers_str
             .lines()
             .map(|line|
                 line.split_once(": ")
                     .expect("Register line must have colon").1
-                    .parse::<u32>().expect("Register value should parse to u64")
+                    .parse::<u64>().expect("Register value should parse to u64")
             )
             .collect();
         let registers = Registers { a: reg_values[0], b: reg_values[1], c: reg_values[2] };
-        let program: Vec<u32> = program_str
+        let program: Vec<u64> = program_str
             .split_once(": ")?.1
             .trim_end()
-            .split(',').map(|string| string.parse::<u32>().expect("Could not parse instruction/operand string to u32"))
+            .split(',').map(|string| string.parse::<u64>().expect("Could not parse instruction/operand string to u32"))
             .collect();
-        
+
         Some(CPU { registers, instruction_pointer: 0, program, out: Vec::new() })
     }
-    
+
     fn run(&mut self) {
         while let Some(&instruction) = self.program.get(self.instruction_pointer as usize) {
             let mut should_jump = true;
@@ -43,7 +57,7 @@ impl CPU {
             };
             match instruction {
                 0 => { // adv
-                    let quotient = self.registers.a / 2_u32.pow(self.combo(operand)); // does this truncate?
+                    let quotient = self.registers.a / 2_u64.pow(self.combo(operand) as u32); // does this truncate?
                     self.registers.a = quotient;
                 },
                 1 => { // bxl
@@ -72,11 +86,11 @@ impl CPU {
                     self.out.push(remainder);
                 },
                 6 => { // bdv
-                    let quotient = self.registers.a / 2_u32.pow(self.combo(operand)); // does this truncate?
+                    let quotient = self.registers.a / 2_u64.pow(self.combo(operand) as u32); // does this truncate?
                     self.registers.b = quotient;
                 },
                 7 => { // cdv
-                    let quotient = self.registers.a / 2_u32.pow(self.combo(operand)); // does this truncate?
+                    let quotient = self.registers.a / 2_u64.pow(self.combo(operand) as u32); // does this truncate?
                     self.registers.c = quotient;
                 },
                 _ => unreachable!("Instruction should be 8-bit"),
@@ -87,7 +101,7 @@ impl CPU {
         }
     }
 
-    fn combo(&self, operand: u32) -> u32 {
+    fn combo(&self, operand: u64) -> u64 {
         match operand {
             0..=3 => operand,
             4 => self.registers.a,
@@ -97,33 +111,41 @@ impl CPU {
             _ => unreachable!("Operand should be 3-bit")
         }
     }
-    
+
     fn read_out(&self) -> String {
         self.out.iter().map(|u| u.to_string()).join(",")
+    }
+
+    fn read_program(&self) -> String {
+        self.program.iter().map(|u| u.to_string()).join(",")
+    }
+
+    fn reset(&mut self) {
+        self.registers.a = 0;
+        self.registers.b = 0;
+        self.registers.c = 0;
+        self.instruction_pointer = 0;
+        self.out = Vec::new();
     }
 }
 
 #[derive(Debug)]
 struct Registers {
-    a: u32,
-    b: u32,
-    c: u32,
-}
-
-pub fn part_2(input: &str) -> usize {
-    0
+    a: u64,
+    b: u64,
+    c: u64,
 }
 
 #[test]
 fn sample_input_part_1() {
-    let input = include_str!("../input/sample_17.txt");
+    let input = include_str!("../input/sample_17_1.txt");
     assert_eq!(part_1(input), "4,6,3,5,6,3,5,2,1,0")
 }
 
 #[test]
 fn sample_input_part_2() {
-    let input = include_str!("../input/sample_17.txt");
-    assert_eq!(part_2(input), 0)
+    let input = include_str!("../input/sample_17_2.txt");
+    assert_eq!(part_2(input), 117440)
 }
 
 #[test]
@@ -135,5 +157,5 @@ fn input_part_1() {
 #[test]
 fn input_part_2() {
     let input = include_str!("../input/input_17.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 190593310997519)
 }
