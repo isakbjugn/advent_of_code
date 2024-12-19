@@ -4,6 +4,7 @@ use took::Timer;
 mod position;
 mod direction;
 mod grid;
+mod sliceable;
 
 mod december_1;
 mod december_2;
