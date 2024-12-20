@@ -6,8 +6,8 @@ use crate::position::Position;
 pub fn part_1(input: &str) -> usize {
     let racetrack = Grid::from_str(input).expect("Could not create maze");
     let optimal_time = racetrack.a_star_search_20().expect("Should be a valid path");
-    optimal_time
-    // racetrack.dijkstra_cheats().len()
+    // optimal_time
+    racetrack.dijkstra_cheats_20(optimal_time).len()
 }
 
 pub fn part_2(input: &str) -> usize {
@@ -17,6 +17,7 @@ pub fn part_2(input: &str) -> usize {
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
 struct Vertex {
     position: Position,
+    cheats: Option<(Position, Position)>
 }
 
 // Define a wrapper type for the heap
@@ -32,7 +33,6 @@ struct AStarState {
 struct DijkstraState {
     cost: usize,
     vertex: Vertex,
-    cheats: (Option<Position>, Option<Position>),
 }
 
 // Implement `Ord` for `State`. We want to order states by cost in reverse order since `BinaryHeap` is a max heap.
@@ -76,6 +76,7 @@ impl Grid {
             estimated_total_cost: end_pos.manhattan_distance(start_pos),
             vertex: Vertex {
                 position: start_pos,
+                cheats: None,
             }
         });
 
@@ -98,6 +99,7 @@ impl Grid {
                 let estimated_total_cost = new_cost + end_pos.manhattan_distance(next_position);
                 let new_vertex = Vertex {
                     position: next_position,
+                    cheats: None,
                 };
 
                 if !distances.contains_key(&new_vertex) || new_cost < distances[&new_vertex] {
@@ -122,15 +124,22 @@ impl Grid {
             cost: 0,
             vertex: Vertex {
                 position: start_pos,
+                cheats: None,
             },
-            cheats: (None, None)
         });
 
-        while let Some(DijkstraState { cost, vertex, cheats, .. }) = heap.pop() {
+        while let Some(DijkstraState { cost, vertex, .. }) = heap.pop() {
             if self.is_goal_state_20(&vertex) {
+                println!("Reached goal state! cost: {}, cheats: {:?}", cost, vertex.cheats);
                 // Add all positions in this path to the result set
-                if cost <= optimal_cost - 100 {
-                    best_cheats.insert((cheats.0.unwrap(), cheats.1.unwrap()));
+                match vertex.cheats {
+                    Some((start_cheat, end_cheat)) if cost <= optimal_cost - 100 => {
+                        match best_cheats.insert((start_cheat, end_cheat)) {
+                            true => println!("Added!"),
+                            false => println!("Already inserted!")
+                        }
+                    }
+                    _ => (),
                 }
                 continue;
             }
@@ -144,16 +153,24 @@ impl Grid {
             distances.insert(vertex.clone(), cost);
 
             for next_position in self.neighbor_iter(&vertex.position) {
+                let new_cheats = match (vertex.cheats, self.get(&next_position)) {
+                    (None, Some('#')) => Some((vertex.position, next_position)),
+                    (Some(cheats), _) if best_cheats.contains(&cheats) => continue,
+                    (Some(_), Some('#')) => continue,
+                    _ => vertex.cheats,
+                };
+                
                 let new_cost = cost + 1;
+                if new_cost > optimal_cost - 100 { continue }
                 let new_vertex = Vertex {
                     position: next_position,
+                    cheats: new_cheats,
                 };
 
                 if !distances.contains_key(&new_vertex) || new_cost < distances[&new_vertex] {
                     heap.push(DijkstraState {
                         cost: new_cost,
                         vertex: new_vertex,
-                        cheats: (None, None)
                     });
                 }
             }
@@ -166,7 +183,7 @@ impl Grid {
 #[test]
 fn sample_input_part_1() {
     let input = include_str!("../input/sample_20.txt");
-    assert_eq!(part_1(input), 84)
+    assert_eq!(part_1(input), 44)
 }
 
 #[test]
@@ -178,7 +195,7 @@ fn sample_input_part_2() {
 #[test]
 fn input_part_1() {
     let input = include_str!("../input/input_20.txt");
-    assert_eq!(part_1(input), 0)
+    assert_eq!(part_1(input), 1355)
 }
 
 #[test]
