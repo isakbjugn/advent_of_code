@@ -9,7 +9,7 @@ pub fn part_1(input: &str) -> String {
 pub fn part_2(input: &str) -> u64 {
     let mut cpu = CPU::from_input(input).expect("Unable to parse input to CPU");
 
-    for register_a in (190593300000000..190593318000000) {
+    for register_a in 190593300000000..190593318000000 {
         cpu.reset();
         cpu.registers.a = register_a;
         cpu.run();
