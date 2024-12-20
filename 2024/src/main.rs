@@ -26,6 +26,7 @@ mod december_17;
 mod december_18;
 mod december_19;
 mod december_20;
+mod search_grid;
 
 fn main() {
     let day = args().nth(1).unwrap();
