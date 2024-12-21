@@ -26,6 +26,7 @@ mod december_17;
 mod december_18;
 mod december_19;
 mod december_20;
+mod december_21;
 
 fn main() {
     let day = args().nth(1).unwrap();
@@ -114,6 +115,10 @@ fn main() {
         "20" => {
             println!("{}. desember, del 1: {:?}", day.as_str(), december_20::part_1(&input, 100));
             println!("{}. desember, del 2: {:?}", day.as_str(), december_20::part_2(&input, 100));
+        }
+        "21" => {
+            println!("{}. desember, del 1: {:?}", day.as_str(), december_21::part_1(&input));
+            println!("{}. desember, del 2: {:?}", day.as_str(), december_21::part_2(&input));
         }
         _ => ()
     }
