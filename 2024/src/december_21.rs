@@ -1,16 +1,15 @@
 use std::collections::HashMap;
 use itertools::Itertools;
+use crate::with::{With};
 
 pub fn part_1(input: &str) -> u64 {
     let mut memo: HashMap<(char, char, u8), u64> = HashMap::new();
     input.lines()
         .map(|line| line.chars().collect::<Vec<char>>())
         .map(|code| -> u64 {
-            let combination_length: u64 = ['A']
-                .iter()
-                .chain(code.iter())
+            let combination_length: u64 = ['A'].with(&code).into_iter()
                 .tuple_windows()
-                .map(|(&from, &to)| find_combination_length(from, to, 3, 3, &mut memo))
+                .map(|(from, to)| find_combination_length(from, to, 3, 3, &mut memo))
                 .sum();
             combination_length * code_to_number(&code).unwrap() as u64
         })
@@ -22,11 +21,9 @@ pub fn part_2(input: &str) -> u64 {
     input.lines()
         .map(|line| line.chars().collect::<Vec<char>>())
         .map(|code| -> u64 {
-            let combination_length: u64 = ['A']
-                .iter()
-                .chain(code.iter())
+            let combination_length: u64 = ['A'].with(&code).into_iter()
                 .tuple_windows()
-                .map(|(&from, &to)| find_combination_length(from, to, 26, 26, &mut memo))
+                .map(|(from, to)| find_combination_length(from, to, 26, 26, &mut memo))
                 .sum();
             combination_length * code_to_number(&code).unwrap() as u64
         })
@@ -42,18 +39,18 @@ fn find_combination_length(from: char, to: char, robots: u8, max_robots: u8, mem
         r if r == max_robots => {
             match move_on_num_pad(from, to) {
                 (button_sequence, false) => {
-                    ['A'].iter().chain(button_sequence.iter()).chain(['A'].iter())
+                    ['A'].with(&button_sequence).with(&['A']).into_iter()
                         .tuple_windows()
-                        .map(|(&from, &to)| find_combination_length(from, to, robots - 1, max_robots, memo))
+                        .map(|(from, to)| find_combination_length(from, to, robots - 1, max_robots, memo))
                         .sum()
                 }
                 (button_sequence, true) => {
                     let k = button_sequence.len();
                     button_sequence.into_iter().permutations(k)
                         .map(|permuted_sequence| {
-                            ['A'].iter().chain(permuted_sequence.iter()).chain(['A'].iter())
+                            ['A'].with(&permuted_sequence).with(&['A']).into_iter()
                                 .tuple_windows()
-                                .map(|(&from, &to)| find_combination_length(from, to, robots - 1, max_robots, memo))
+                                .map(|(from, to)| find_combination_length(from, to, robots - 1, max_robots, memo))
                                 .sum()
                         })
                         .min().expect("Should be a minimum")
@@ -63,18 +60,18 @@ fn find_combination_length(from: char, to: char, robots: u8, max_robots: u8, mem
         _ => {
             match move_on_d_pad(from, to) {
                 (button_sequence, false) => {
-                    ['A'].iter().chain(button_sequence.iter()).chain(['A'].iter())
+                    ['A'].with(&button_sequence).with(&['A']).into_iter()
                         .tuple_windows()
-                        .map(|(&from, &to)| find_combination_length(from, to, robots - 1, max_robots, memo))
+                        .map(|(from, to)| find_combination_length(from, to, robots - 1, max_robots, memo))
                         .sum()
                 }
                 (button_sequence, true) => {
                     let k = button_sequence.len();
                     button_sequence.into_iter().permutations(k)
                         .map(|permuted_sequence| {
-                            ['A'].iter().chain(permuted_sequence.iter()).chain(['A'].iter())
+                            ['A'].with(&permuted_sequence).with(&['A']).into_iter()
                                 .tuple_windows()
-                                .map(|(&from, &to)| find_combination_length(from, to, robots - 1, max_robots, memo))
+                                .map(|(from, to)| find_combination_length(from, to, robots - 1, max_robots, memo))
                                 .sum()
                         })
                         .min().expect("Should be a minimum")
