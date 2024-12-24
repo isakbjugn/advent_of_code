@@ -10,20 +10,29 @@ enum Operator {
 }
 
 pub fn part_1(input: &str) -> u64 {
+    let (wires, gates) = to_wires_and_gates(input);
+    perform_calculation(wires, gates)
+}
+
+pub fn part_2(input: &str) -> u32 {
+    0
+}
+
+fn to_wires_and_gates(input: &str) -> (HashMap<&str, Option<u8>>, Vec<(&str, Operator, &str, &str)>) {
     let mut wires: HashMap<&str, Option<u8>> = HashMap::new();
     let mut gates: Vec<(&str, Operator, &str, &str)> = Vec::new();
-    
+
     let (wires_input, gates_input) = input.split_once("\n\n").expect("Input has one two-line break");
     wires_input.lines()
         .map(|line| line.split_once(": ").expect("Wire input has \": \""))
         .for_each(|(wire, initial_value)| {
             wires.insert(wire, Some(initial_value.parse::<u8>().expect("Wire value can be parsed as u8")));
         });
-    
+
     // Please help write a Regex to parse this line into ((&str, Operator, &str), &str):
     // x00 AND y00 -> z00
     let re = regex::Regex::new(r"([a-z0-9]+) (AND|OR|XOR) ([a-z0-9]+) -> ([a-z0-9]+)").unwrap();
-    
+
     gates_input.lines()
         .map(|line| {
             if let Some(captures) = re.captures(line) {
@@ -53,7 +62,11 @@ pub fn part_1(input: &str) -> u64 {
             }
             gates.push((wire_1, operator, wire_2, wire_3));
         });
-    
+    (wires, gates)
+}
+
+fn perform_calculation(wires: HashMap<&str, Option<u8>>, gates:Vec<(&str, Operator, &str, &str)>) -> u64 {
+    let mut wires = wires.clone();
     while wires.values().contains(&None) {
         for (input_1, operator, input_2, output) in gates.iter() {
             let output_wire_value = match (wires.get(input_1).unwrap(), operator, wires.get(input_2).unwrap()) {
@@ -72,18 +85,11 @@ pub fn part_1(input: &str) -> u64 {
             *output_wire = Some(output_wire_value);
         }
     }
-    
     wires.into_iter()
         .filter(|(wire, _)| wire.starts_with('z'))
         .sorted_by_key(|kv| kv.0)
         .rev()
-        // .for_each(|kv| println!("{}: {}", kv.0, kv.1.unwrap()));
         .fold(0, |acc, (_, elem)| acc * 2 + elem.expect("Every wire should have a value by now") as u64)
-    // 0
-}
-
-pub fn part_2(input: &str) -> u32 {
-    0
 }
 
 #[test]
