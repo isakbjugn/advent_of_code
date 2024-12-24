@@ -14,8 +14,12 @@ pub fn part_1(input: &str) -> u64 {
     perform_calculation(wires, gates)
 }
 
-pub fn part_2(input: &str) -> u32 {
-    0
+pub fn part_2(input: &str) -> String {
+    let (wires, mut gates) = to_wires_and_gates(input);
+    
+    let x = calculate_decimal(&wires, 'x');
+    perform_calculation(wires, gates);
+    String::new()
 }
 
 fn to_wires_and_gates(input: &str) -> (HashMap<&str, Option<u8>>, Vec<(&str, Operator, &str, &str)>) {
@@ -85,11 +89,16 @@ fn perform_calculation(wires: HashMap<&str, Option<u8>>, gates:Vec<(&str, Operat
             *output_wire = Some(output_wire_value);
         }
     }
+    calculate_decimal(&wires, 'z')
+}
+
+fn calculate_decimal(wires: &HashMap<&str, Option<u8>>, name: char) -> u64 {
     wires.into_iter()
-        .filter(|(wire, _)| wire.starts_with('z'))
+        .filter(|(wire, _)| wire.starts_with(name))
         .sorted_by_key(|kv| kv.0)
         .rev()
         .fold(0, |acc, (_, elem)| acc * 2 + elem.expect("Every wire should have a value by now") as u64)
+
 }
 
 #[test]
@@ -107,7 +116,7 @@ fn sample_input_part_1_2() {
 #[test]
 fn sample_input_part_2_1() {
     let input = include_str!("../input/sample_24_1.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), "0")
 }
 
 #[test]
@@ -119,5 +128,5 @@ fn input_part_1() {
 #[test]
 fn input_part_2() {
     let input = include_str!("../input/input_24.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), "0")
 }
