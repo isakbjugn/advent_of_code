@@ -3,10 +3,10 @@ pub fn part_1(input: &str) -> u32 {
     let mut zeros = 0;
     for line in input.lines() {
         let (direction, value) = line.split_at(1);
-        let value: i32 = value.parse().unwrap();
+        let distance: i32 = value.parse().unwrap();
         dial = match direction {
-            "L" => (dial - value) % 100,
-            "R" => (dial + value) % 100,
+            "L" => (dial - distance) % 100,
+            "R" => (dial + distance) % 100,
             &_ => unreachable!(),
         };
         if dial < 0 {
@@ -22,10 +22,10 @@ pub fn part_2(input: &str) -> i32 {
     let mut zeros = 0;
     for line in input.lines() {
         let (direction, value) = line.split_at(1);
-        let value: i32 = value.parse().unwrap();
+        let distance: i32 = value.parse().unwrap();
         dial = match direction {
             "L" => {
-                let new_value = dial - value;
+                let new_value = dial - distance;
                 if new_value == 0 {
                     zeros += 1;
                 }
@@ -40,7 +40,7 @@ pub fn part_2(input: &str) -> i32 {
                 new_value % 100
             },
             "R" => {
-                let new_value = dial + value;
+                let new_value = dial + distance;
                 let clicks = new_value / 100;
                 zeros += clicks;
                 new_value % 100
