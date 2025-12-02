@@ -1,17 +1,13 @@
 pub fn part_1(input: &str) -> u64 {
-    let ranges = input.split(',');
-    let mut sum = 0;
-    for range in ranges {
-        let (first, last) = range.split_once('-').expect("Burde være bindestrek som skilletegn");
-        let first = first.parse::<u64>().expect("Må være heltall");
-        let last = last.parse::<u64>().expect("Må være heltall");
-        for number in first..=last {
-            if is_repeated(number) {
-                sum += number;
-            }
-        }
-    }
-    sum
+    input
+        .split(',')
+        .flat_map(|range| {
+            let (first, last) = range.split_once('-').unwrap();
+            let first = first.parse::<u64>().unwrap();
+            let last = last.parse::<u64>().unwrap();
+            (first..=last).filter(|&id| is_repeated(id))
+        })
+        .sum()
 }
 
 fn is_repeated(number: u64) -> bool {
@@ -21,19 +17,15 @@ fn is_repeated(number: u64) -> bool {
 }
 
 pub fn part_2(input: &str) -> u64 {
-    let ranges = input.split(',');
-    let mut sum = 0;
-    for range in ranges {
-        let (first, last) = range.split_once('-').expect("Burde være bindestrek som skilletegn");
-        let first = first.parse::<u64>().expect("Må være heltall");
-        let last = last.parse::<u64>().expect("Må være heltall");
-        for number in first..=last {
-            if is_repeated_any_number_of_times(number) {
-                sum += number;
-            }
-        }
-    }
-    sum
+    input
+        .split(',')
+        .flat_map(|range| {
+            let (first, last) = range.split_once('-').unwrap();
+            let first = first.parse::<u64>().unwrap();
+            let last = last.parse::<u64>().unwrap();
+            (first..=last).filter(|&id| is_repeated_any_number_of_times(id))
+        })
+        .sum()
 }
 
 fn is_repeated_any_number_of_times(number: u64) -> bool {
