@@ -15,16 +15,9 @@ pub fn part_1(input: &str) -> u64 {
 }
 
 fn is_repeated(number: u64) -> bool {
-    match number.to_string().len() % 2 {
-        0 => {
-            let s = number.to_string();
-            let mid = s.len() / 2;
-            let first_half = &s[..mid];
-            let second_half = &s[mid..];
-            first_half == second_half
-        }
-        _ => false,
-    }
+    let string = number.to_string();
+    let (first_half, second_half) = string.as_str().split_at(string.len() / 2);
+    first_half == second_half
 }
 
 pub fn part_2(input: &str) -> u64 {
@@ -44,14 +37,13 @@ pub fn part_2(input: &str) -> u64 {
 }
 
 fn is_repeated_any_number_of_times(number: u64) -> bool {
-    for char in 1..=number.to_string().len()/2 {
-        let substring = &number.to_string()[0..char];
-        let mut repeated = String::new();
-        while repeated.len() < number.to_string().len() {
-            repeated.push_str(substring);
-        }
-        if repeated == number.to_string() {
-            return true;
+    let string = number.to_string();
+    for repeated_length in 1..=string.len()/2 {
+        let mut chunks = string.as_bytes().chunks(repeated_length);
+        if let Some(first) = chunks.next() {
+            if chunks.all(|chunk| chunk == first) {
+                return true;
+            }
         }
     }
     false
