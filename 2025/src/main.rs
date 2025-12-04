@@ -5,6 +5,9 @@ mod december_1;
 mod december_2;
 mod december_3;
 mod december_4;
+mod direction;
+mod grid;
+mod position;
 
 fn main() {
     let day = args().nth(1).unwrap();
