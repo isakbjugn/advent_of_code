@@ -46,7 +46,7 @@ impl Transpose for String {
     }
 }
 
-impl Transpose for Vec<Vec<u8>> {
+impl Transpose for Vec<Vec<u64>> {
     fn transpose(&self) -> Self {
         if self.is_empty() || self[0].is_empty() {
             return vec![];
@@ -54,7 +54,7 @@ impl Transpose for Vec<Vec<u8>> {
 
         let row_count = self.len();
         let col_count = self[0].len();
-        let mut transposed = vec![vec![0u8; row_count]; col_count];
+        let mut transposed = vec![vec![0u64; row_count]; col_count];
 
         for i in 0..row_count {
             for j in 0..col_count {
@@ -118,16 +118,16 @@ mod tests {
     }
 
     #[test]
-    fn test_transpose_u8_matrix() {
+    fn test_transpose_u64_matrix() {
         let matrix = vec![
-            vec![1u8, 2u8, 3u8],
-            vec![4u8, 5u8, 6u8],
+            vec![1u64, 2u64, 3u64],
+            vec![4u64, 5u64, 6u64],
         ];
         let transposed_matrix = matrix.transpose();
         let expected = vec![
-            vec![1u8, 4u8],
-            vec![2u8, 5u8],
-            vec![3u8, 6u8],
+            vec![1u64, 4u64],
+            vec![2u64, 5u64],
+            vec![3u64, 6u64],
         ];
         assert_eq!(transposed_matrix, expected);
     }
