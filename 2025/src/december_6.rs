@@ -1,4 +1,5 @@
 use regex::Regex;
+use crate::transpose::Transpose;
 
 pub fn part_1(input: &str) -> u64 {
     let rows: Vec<Vec<&str>> = input
@@ -27,7 +28,7 @@ pub fn part_1(input: &str) -> u64 {
 
 pub fn part_2(input: &str) -> u64 {
     let (problem_string, operators_line) = input.trim_end().rsplit_once('\n').unwrap();
-    let transposed_problem_string = transpose_string(problem_string);
+    let transposed_problem_string = String::from(problem_string).transpose();
     let operators: Vec<&str> = operators_line.split_whitespace().collect();
 
     let re = Regex::new(r"\n\s*\n").unwrap();
@@ -51,24 +52,6 @@ pub fn part_2(input: &str) -> u64 {
             }
         })
         .sum()
-}
-
-fn transpose_string(input: &str) -> String {
-    let rows: Vec<&str> = input.lines().collect();
-    let mut transposed_rows: Vec<String> = Vec::new();
-    let max_length = rows.iter().map(|row| row.len()).max().unwrap_or(0);
-    for col_index in 0..max_length {
-        let mut new_row = String::new();
-        for row in &rows {
-            if col_index < row.len() {
-                new_row.push(row.chars().nth(col_index).unwrap());
-            } else {
-                new_row.push(' ');
-            }
-        }
-        transposed_rows.push(new_row);
-    }
-    transposed_rows.join("\n")
 }
 
 #[test]
