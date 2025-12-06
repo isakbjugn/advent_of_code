@@ -10,17 +10,7 @@ pub fn part_1(input: &str) -> u64 {
     let transposed_problems = problems.transpose();
     let operators: Vec<&str> = operators_line.split_whitespace().collect();
 
-    transposed_problems
-        .iter()
-        .enumerate()
-        .map(|(problem_index, problem)| {
-            match operators[problem_index] {
-                "+" => problem.iter().sum::<u64>(),
-                "*" => problem.iter().product::<u64>(),
-                &_ => panic!("Unknown operator {}", operators[problem_index]),
-            }
-        })
-        .sum()
+    calculate(&transposed_problems, &operators)
 }
 
 pub fn part_2(input: &str) -> u64 {
@@ -32,7 +22,11 @@ pub fn part_2(input: &str) -> u64 {
         .collect();
     let operators: Vec<&str> = operators_line.split_whitespace().collect();
 
-    transposed_problems
+    calculate(&transposed_problems, &operators)
+}
+
+fn calculate(problems: &[Vec<u64>], operators: &[&str]) -> u64 {
+    problems
         .iter()
         .enumerate()
         .map(|(problem_index, problem)| {
