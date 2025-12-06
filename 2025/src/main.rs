@@ -4,6 +4,7 @@ use took::Timer;
 mod direction;
 mod grid;
 mod position;
+mod transpose;
 
 mod december_1;
 mod december_2;
@@ -11,7 +12,6 @@ mod december_3;
 mod december_4;
 mod december_5;
 mod december_6;
-mod transpose;
 
 fn main() {
     let day = args().nth(1).unwrap();
