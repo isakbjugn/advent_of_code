@@ -1,3 +1,5 @@
+use regex::Regex;
+
 pub fn part_1(input: &str) -> u64 {
     let rows: Vec<Vec<&str>> = input
         .lines()
@@ -24,7 +26,48 @@ pub fn part_1(input: &str) -> u64 {
 }
 
 pub fn part_2(input: &str) -> u64 {
-    0
+    let number_rows = input.lines().count() - 1;
+    let operators: Vec<&str> = input.lines().last().unwrap().split_whitespace().collect();
+
+    let transposed_input = {
+        let rows: Vec<&str> = input.lines().take(number_rows).collect();
+        let mut transposed_rows: Vec<String> = Vec::new();
+        let max_length = rows.iter().map(|row| row.len()).max().unwrap_or(0);
+        for col_index in 0..max_length {
+            let mut new_row = String::new();
+            for row in &rows {
+                if col_index < row.len() {
+                    new_row.push(row.chars().nth(col_index).unwrap());
+                } else {
+                    new_row.push(' ');
+                }
+            }
+            transposed_rows.push(new_row);
+        }
+        transposed_rows.join("\n")
+    };
+
+    let re = Regex::new(r"\n\s*\n").unwrap();
+
+    re
+        .split(transposed_input.as_str())
+        .enumerate()
+        .map(|(problem_index, problem)| {
+            match operators[problem_index] {
+                "+" => {
+                    problem
+                        .lines()
+                        .fold(0, |acc, line| acc + line.trim().parse::<u64>().unwrap_or(0))
+                }
+                "*" => {
+                    problem
+                        .lines()
+                        .fold(1, |acc, line| acc * line.trim().parse::<u64>().unwrap_or(1))
+                },
+                &_ => panic!("Unknown operator {}", operators[problem_index]),
+            }
+        })
+        .sum()
 }
 
 #[test]
@@ -42,11 +85,11 @@ fn input_part_1() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_6.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 3263827)
 }
 
 #[test]
 fn input_part_2() {
     let input = include_str!("../input/input_6.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 6019576291014)
 }
