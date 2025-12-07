@@ -13,15 +13,12 @@ pub fn part_1(input: &str) -> u64 {
         let mut resulting_beams = HashSet::new();
         for &beam_x in &beams {
             match tachyon_manifold.get(&Position { x: beam_x, y: y + 1 }) {
-                Some('.') => {
-                    resulting_beams.insert(beam_x);
-                }
                 Some('^') => {
                     resulting_beams.insert(beam_x - 1);
                     resulting_beams.insert(beam_x + 1);
                     splits += 1;
                 },
-                _ => { /* Strålen går utenfor rutenettet */ }
+                _ => { resulting_beams.insert(beam_x); }
             };
         }
         beams = resulting_beams;
