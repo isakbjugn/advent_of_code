@@ -11,7 +11,7 @@ pub enum Direction {
 }
 
 impl Direction {
-    pub fn clockwise(&self) -> Direction {
+    pub fn _clockwise(&self) -> Direction {
         match self {
             Direction::North => Direction::East,
             Direction::East => Direction::South,
@@ -20,7 +20,7 @@ impl Direction {
             _ => panic!(),
         }
     }
-    pub fn counter_clockwise(&self) -> Direction {
+    pub fn _counter_clockwise(&self) -> Direction {
         match self {
             Direction::North => Direction::West,
             Direction::West => Direction::South,

@@ -33,7 +33,7 @@ impl Grid {
         Ok(Grid { height: rows.len(), width: rows[0].len(), data: rows })
     }
     
-    pub fn new(height: usize, width: usize, fill: char) -> Self {
+    pub fn _new(height: usize, width: usize, fill: char) -> Self {
         let mut rows = Vec::new();
 
         for _ in 0..height {
@@ -54,7 +54,7 @@ impl Grid {
     
     pub fn height(&self) -> usize { self.height }
 
-    pub fn width(&self) -> usize { self.width }
+    pub fn _width(&self) -> usize { self.width }
     
     pub fn set(&mut self, position: Position, value: char) {
         if position.x < self.width && position.y < self.height {
@@ -65,7 +65,7 @@ impl Grid {
         }
     }
     
-    pub fn next_value(&self, position: &Position, direction: Direction) -> Option<char> {
+    pub fn _next_value(&self, position: &Position, direction: Direction) -> Option<char> {
         self.next_position(position, direction)
             .map(|next_cell| self.get(&next_cell))?
     }
@@ -134,7 +134,7 @@ impl Grid {
             .map(|(position, _)| position)
     }
     
-    pub fn direction_vec(&self, position: Position, direction: Direction) -> Vec<Position> {
+    pub fn _direction_vec(&self, position: Position, direction: Direction) -> Vec<Position> {
         let mut positions = Vec::new();
         let mut current_position = position;
         while let Some(next_position) = self.next_position(&current_position, direction) {
@@ -152,7 +152,7 @@ impl Grid {
         })
     }
     
-    pub fn are_neighbors(&self, a: &Position, b: &Position) -> bool {
+    pub fn _are_neighbors(&self, a: &Position, b: &Position) -> bool {
         self.neighbor_iter(a).contains(b)
     }
 }
