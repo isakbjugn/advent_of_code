@@ -84,6 +84,7 @@ pub fn part_2(input: &str) -> u64 {
                 touched_circuits += 1;
                 if circuit.len() == boxes.len() && completing_pair.is_none() {
                     completing_pair = Some(*box_pair);
+                    break
                 }
             }
         }
@@ -99,6 +100,7 @@ pub fn part_2(input: &str) -> u64 {
             });
             if merged_circuit.len() == boxes.len() && completing_pair.is_none() {
                 completing_pair = Some(*box_pair);
+                break
             }
             circuits.push(merged_circuit);
         } else if touched_circuits == 0 {
