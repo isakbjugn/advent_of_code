@@ -3,7 +3,7 @@ use std::collections::HashSet;
 pub fn part_1(input: &str) -> u64 {
     let boxes: Vec<(u32, u32, u32)> = input.lines().map(to_box).collect();
     let connections = if boxes.len() > 20 { 1000 } else { 10 };
-    let closest_box_pairs = n_closest_box_pairs(&boxes, connections);
+    let closest_box_pairs = get_n_closest_box_pairs(&boxes, Some(connections));
     let mut circuits: Vec<HashSet<u32>> = Vec::new();
 
     for box_pair in closest_box_pairs {
@@ -41,7 +41,7 @@ fn to_box(box_str: &str) -> (u32, u32, u32) {
     (box_vec[0], box_vec[1], box_vec[2])
 }
 
-fn n_closest_box_pairs(boxes: &[(u32, u32, u32)], n: usize) -> Vec<(u32, u32)> {
+fn get_n_closest_box_pairs(boxes: &[(u32, u32, u32)], n: Option<usize>) -> Vec<(u32, u32)> {
     let mut box_pairs: Vec<(u32, u32, f64)> = Vec::new();
 
     for i in 0..boxes.len() {
@@ -52,7 +52,10 @@ fn n_closest_box_pairs(boxes: &[(u32, u32, u32)], n: usize) -> Vec<(u32, u32)> {
     }
 
     box_pairs.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap());
-    box_pairs.into_iter().take(n).map(|(b1, b2, _)| (b1, b2)).collect()
+    match n {
+        None => box_pairs.into_iter().map(|(b1, b2, _)| (b1, b2)).collect(),
+        Some(n) => box_pairs.into_iter().take(n).map(|(b1, b2, _)| (b1, b2)).collect(),
+    }
 }
 
 fn euclidean_distance(p0: (u32, u32, u32), p1: (u32, u32, u32)) -> f64 {
@@ -70,7 +73,7 @@ fn get_product_of_three_largest_circuits(circuits: &[HashSet<u32>]) -> u64 {
 
 pub fn part_2(input: &str) -> u64 {
     let boxes: Vec<(u32, u32, u32)> = input.lines().map(to_box).collect();
-    let sorted_box_pairs = all_sorted_box_pairs(&boxes);
+    let sorted_box_pairs = get_n_closest_box_pairs(&boxes, None);
     let mut circuits: Vec<HashSet<u32>> = Vec::new();
     let mut completing_pair: Option<(u32, u32)> = None;
 
@@ -113,20 +116,6 @@ pub fn part_2(input: &str) -> u64 {
         let last_pair = sorted_box_pairs.last().unwrap();
         boxes[last_pair.0 as usize].0 as u64 * boxes[last_pair.1 as usize].0 as u64
     }
-}
-
-fn all_sorted_box_pairs(boxes: &[(u32, u32, u32)]) -> Vec<(u32, u32)> {
-    let mut box_pairs: Vec<(u32, u32, f64)> = Vec::new();
-
-    for i in 0..boxes.len() {
-        for j in (i + 1)..boxes.len() {
-            let distance = euclidean_distance(boxes[i], boxes[j]);
-            box_pairs.push((i as u32, j as u32, distance));
-        }
-    }
-
-    box_pairs.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap());
-    box_pairs.into_iter().map(|(b1, b2, _)| (b1, b2)).collect()
 }
 
 #[test]
