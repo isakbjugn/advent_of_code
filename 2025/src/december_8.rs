@@ -19,9 +19,7 @@ pub fn part_1(input: &str) -> u64 {
             let mut merged_circuit: HashSet<u32> = HashSet::new();
             circuits.retain(|circuit| {
                 if circuit.contains(&box_pair.0) || circuit.contains(&box_pair.1) {
-                    for &b in circuit {
-                        merged_circuit.insert(b);
-                    }
+                    merged_circuit.extend(circuit);
                     false
                 } else {
                     true
@@ -93,9 +91,7 @@ pub fn part_2(input: &str) -> u64 {
             let mut merged_circuit: HashSet<u32> = HashSet::new();
             circuits.retain(|circuit| {
                 if circuit.contains(&box_pair.0) || circuit.contains(&box_pair.1) {
-                    for &b in circuit {
-                        merged_circuit.insert(b);
-                    }
+                    merged_circuit.extend(circuit);
                     false
                 } else {
                     true
