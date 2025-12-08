@@ -75,7 +75,7 @@ pub fn part_2(input: &str) -> u64 {
     let mut circuits: Vec<HashSet<u32>> = Vec::new();
     let mut completing_pair: Option<(u32, u32)> = None;
 
-    for box_pair in sorted_box_pairs.iter() {
+    for box_pair in sorted_box_pairs {
         let mut touched_circuits = 0;
         for circuit in &mut circuits {
             if circuit.contains(&box_pair.0) || circuit.contains(&box_pair.1) {
@@ -83,7 +83,7 @@ pub fn part_2(input: &str) -> u64 {
                 circuit.insert(box_pair.1);
                 touched_circuits += 1;
                 if circuit.len() == boxes.len() && completing_pair.is_none() {
-                    completing_pair = Some(*box_pair);
+                    completing_pair = Some(box_pair);
                     break
                 }
             }
@@ -99,7 +99,7 @@ pub fn part_2(input: &str) -> u64 {
                 }
             });
             if merged_circuit.len() == boxes.len() && completing_pair.is_none() {
-                completing_pair = Some(*box_pair);
+                completing_pair = Some(box_pair);
                 break
             }
             circuits.push(merged_circuit);
@@ -111,8 +111,7 @@ pub fn part_2(input: &str) -> u64 {
     if let Some((box_1, box_2)) = completing_pair {
         boxes[box_1 as usize].0 as u64 * boxes[box_2 as usize].0 as u64
     } else {
-        let last_pair = sorted_box_pairs.last().unwrap();
-        boxes[last_pair.0 as usize].0 as u64 * boxes[last_pair.1 as usize].0 as u64
+        0
     }
 }
 
