@@ -4,34 +4,23 @@ pub fn part_1(input: &str) -> u64 {
     let boxes: Vec<(u32, u32, u32)> = input.lines().map(to_box).collect();
     let connections = if boxes.len() > 20 { 1000 } else { 10 };
     let closest_box_pairs = n_closest_box_pairs(&boxes, connections);
-    let mut circuits: Vec<Vec<u32>> = Vec::new();
+    let mut circuits: Vec<HashSet<u32>> = Vec::new();
 
     for box_pair in closest_box_pairs {
-        let mut added_once = false;
-        let mut added_multiple = false;
+        let mut touched_circuits = 0;
         for circuit in &mut circuits {
             if circuit.contains(&box_pair.0) || circuit.contains(&box_pair.1) {
-                if !circuit.contains(&box_pair.0) {
-                    circuit.push(box_pair.0);
-                }
-                if !circuit.contains(&box_pair.1) {
-                    circuit.push(box_pair.1);
-                }
-                if added_once {
-                    added_multiple = true;
-                } else {
-                    added_once = true;
-                }
+                circuit.insert(box_pair.0);
+                circuit.insert(box_pair.1);
+                touched_circuits += 1;
             }
         }
-        if added_multiple {
-            let mut merged_circuit: Vec<u32> = Vec::new();
+        if touched_circuits > 1 {
+            let mut merged_circuit: HashSet<u32> = HashSet::new();
             circuits.retain(|circuit| {
                 if circuit.contains(&box_pair.0) || circuit.contains(&box_pair.1) {
                     for &b in circuit {
-                        if !merged_circuit.contains(&b) {
-                            merged_circuit.push(b);
-                        }
+                        merged_circuit.insert(b);
                     }
                     false
                 } else {
@@ -39,8 +28,8 @@ pub fn part_1(input: &str) -> u64 {
                 }
             });
             circuits.push(merged_circuit);
-        } else if !added_once {
-            circuits.push(vec![box_pair.0, box_pair.1]);
+        } else if touched_circuits == 0 {
+            circuits.push(HashSet::from([box_pair.0, box_pair.1]));
         }
     }
 
@@ -73,7 +62,7 @@ fn euclidean_distance(p0: (u32, u32, u32), p1: (u32, u32, u32)) -> f64 {
     (dx * dx + dy * dy + dz * dz).sqrt()
 }
 
-fn get_product_of_three_largest_circuits(circuits: &[Vec<u32>]) -> u64 {
+fn get_product_of_three_largest_circuits(circuits: &[HashSet<u32>]) -> u64 {
     let mut circuit_sizes: Vec<usize> = circuits.iter().map(|circuit| circuit.len()).collect();
     circuit_sizes.sort_unstable_by(|a, b| b.cmp(a));
     circuit_sizes.iter().take(3).map(|&size| size as u64).product()
@@ -82,7 +71,6 @@ fn get_product_of_three_largest_circuits(circuits: &[Vec<u32>]) -> u64 {
 pub fn part_2(input: &str) -> u64 {
     let boxes: Vec<(u32, u32, u32)> = input.lines().map(to_box).collect();
     let sorted_box_pairs = all_sorted_box_pairs(&boxes);
-    println!("{} boxes give {} box pairs", boxes.len(), sorted_box_pairs.len());
     let mut circuits: Vec<HashSet<u32>> = Vec::new();
     let mut completing_pair: Option<(u32, u32)> = None;
 
