@@ -26,7 +26,41 @@ fn get_rectangles_areas(tiles: &[(u64, u64)]) -> Vec<u64> {
 }
 
 pub fn part_2(input: &str) -> u64 {
-    0
+    let mut tiles: Vec<_> = input.lines().map(to_tile).collect();
+    tiles.push(tiles[0]);
+
+    let mut top_right = None;
+    for two_tiles in tiles.windows(2) {
+        let first = two_tiles[0];
+        let second = two_tiles[1];
+        if second.0 > first.0 && second.0 - first.0 > 20000 {
+            top_right = Some(two_tiles[1])
+        }
+    }
+
+    let mut areas = Vec::new();
+
+    let top_right = top_right.expect("Fant ikke top right corner");
+    for bottom_left in tiles.iter().filter(|&&(x, y)| x < top_right.0 && y > top_right.1) {
+        let upper_left = (bottom_left.0, top_right.1);
+        let lower_right = (top_right.0, bottom_left.1);
+        let area = (lower_right.0 - upper_left.0 + 1) * (lower_right.1 - upper_left.1 + 1);
+
+        let mut valid = true;
+        for &tile in &tiles {
+            let x_inside = tile.0 > upper_left.0 && tile.0 < lower_right.0;
+            let y_inside = tile.1 > upper_left.1 && tile.1 < lower_right.1;
+            if x_inside && y_inside {
+                valid = false;
+                break;
+            }
+        }
+        if valid {
+            areas.push(area);
+        }
+    }
+
+    areas.into_iter().max().unwrap_or(0)
 }
 
 #[test]
@@ -44,11 +78,11 @@ fn input_part_1() {
 #[test]
 fn sample_input_part_2() {
     let input = include_str!("../input/sample_9.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 24)
 }
 
 #[test]
 fn input_part_2() {
     let input = include_str!("../input/input_9.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 1470616992)
 }
