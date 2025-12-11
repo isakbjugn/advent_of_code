@@ -1,3 +1,5 @@
+use crate::position::Position;
+
 pub fn part_1(input: &str) -> u64 {
     let tiles: Vec<_> = input.lines().map(to_tile).collect();
     let areas = get_rectangles_areas(&tiles);
@@ -28,6 +30,36 @@ fn get_rectangles_areas(tiles: &[(u64, u64)]) -> Vec<u64> {
 pub fn part_2(input: &str) -> u64 {
     let mut tiles: Vec<_> = input.lines().map(to_tile).collect();
     tiles.push(tiles[0]);
+
+    if tiles.len() < 10 {
+        let edge_tiles = tiles
+            .windows(2)
+            .map(|w| (Position::from_xy_tuple(w[0]), Position::from_xy_tuple(w[1])))
+            .flat_map(|(first_tile, second_tile)| first_tile.positions_between(&second_tile))
+            .map(|pos| (pos.x as u64, pos.y as u64))
+            .collect::<Vec<_>>();
+
+        let mut areas = Vec::new();
+        for top_left in &tiles {
+            for bottom_right in tiles.iter().filter(|tile| tile.0 > top_left.0 && tile.1 > top_left.1) {
+                let area = (bottom_right.0 - top_left.0 + 1) * (bottom_right.1 - top_left.1 + 1);
+
+                let mut valid = true;
+                for &edge_tile in &edge_tiles {
+                    let x_inside = edge_tile.0 > top_left.0 && edge_tile.0 < bottom_right.0;
+                    let y_inside = edge_tile.1 > top_left.1 && edge_tile.1 < bottom_right.1;
+                    if x_inside && y_inside {
+                        valid = false;
+                        break;
+                    }
+                }
+                if valid {
+                    areas.push(area);
+                }
+            }
+        }
+        return areas.into_iter().max().unwrap_or(0);
+    }
 
     let mut top_right = None;
     for two_tiles in tiles.windows(2) {
