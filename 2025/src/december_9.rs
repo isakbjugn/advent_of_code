@@ -1,25 +1,27 @@
+use crate::position::Position;
+
 pub fn part_1(input: &str) -> u64 {
-    let tiles: Vec<_> = input.lines().map(to_tile).collect();
+    let mut tiles: Vec<_> = input.lines().map(to_tile).collect();
+    tiles.push(tiles[0]);
+
     let areas = get_rectangles_areas(&tiles);
     areas.into_iter().max().unwrap_or(0)
 }
 
-fn to_tile(line: &str) -> (u64, u64) {
+fn to_tile(line: &str) -> Position {
     let mut parts = line.split(',');
-    let x: u64 = parts.next().unwrap().parse().unwrap();
-    let y: u64 = parts.next().unwrap().parse().unwrap();
-    (x, y)
+    let x: usize = parts.next().unwrap().parse().unwrap();
+    let y: usize = parts.next().unwrap().parse().unwrap();
+    Position { x, y }
 }
 
-fn get_rectangles_areas(tiles: &[(u64, u64)]) -> Vec<u64> {
+fn get_rectangles_areas(tiles: &[Position]) -> Vec<u64> {
     let mut areas = Vec::new();
-    for i in 0..tiles.len() {
-        for j in i+1..tiles.len() {
-            let (x1, y1) = tiles[i];
-            let (x2, y2) = tiles[j];
-            let width = x1.abs_diff(x2) + 1;
-            let height = y1.abs_diff(y2) + 1;
-            areas.push(width * height);
+    for (idx, first_tile) in tiles.iter().enumerate() {
+        for second_tile in tiles.iter().skip(idx + 1) {
+            let width = first_tile.x.abs_diff(second_tile.x) + 1;
+            let height = first_tile.y.abs_diff(second_tile.y) + 1;
+            areas.push((width * height) as u64);
         }
     }
     areas
