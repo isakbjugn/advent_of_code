@@ -1,3 +1,8 @@
+mod grid;
+mod sum_to;
+mod direction;
+mod position;
+
 mod december_1;
 mod december_2;
 mod december_3;
@@ -16,11 +21,7 @@ mod december_14;
 mod december_15;
 mod december_16;
 mod december_17;
-
-mod grid;
-mod sum_to;
-mod direction;
-mod position;
+mod december_18;
 
 use std::{
     env::args,
@@ -104,6 +105,10 @@ fn main() {
         "17" => {
             println!("{}. desember, del 1: {}", day.as_str(), december_17::part_1(&input));
             println!("{}. desember, del 2: {}", day.as_str(), december_17::part_2(&input));
+        }
+        "18" => {
+            println!("{}. desember, del 1: {}", day.as_str(), december_18::part_1(&input));
+            println!("{}. desember, del 2: {}", day.as_str(), december_18::part_2(&input));
         }
         _ => ()
     }
