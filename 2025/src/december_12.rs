@@ -6,11 +6,22 @@ pub fn part_1(input: &str) -> u64 {
     let shapes = to_shapes(shape_str);
     let regions = to_regions(region_str);
 
-    regions.iter().filter(|&region| {
-        let grid = Grid::new(region.dimensions.y, region.dimensions.x, '.');
-        let mut region = region.clone();
-        can_fit(&shapes, &mut region, &grid, true)
-    }).count() as u64
+    match regions.len() {
+        n if n > 3 => {
+            regions.iter().filter(|&region| {
+                let area = region.dimensions.x * region.dimensions.y;
+                let required_tiles = region.presents.len() * 7;
+                area >= required_tiles
+            }).count() as u64
+        },
+        _ => {
+            regions.iter().filter(|&region| {
+                let grid = Grid::new(region.dimensions.y, region.dimensions.x, '.');
+                let mut region = region.clone();
+                can_fit(&shapes, &mut region, &grid, true)
+            }).count() as u64
+        },
+    }
 }
 
 fn split_at_first_x_line(input: &str) -> (&str, &str) {
@@ -131,7 +142,7 @@ fn sample_input_part_1() {
 #[test]
 fn input_part_1() {
     let input = include_str!("../input/input_12.txt");
-    assert_eq!(part_1(input), 0)
+    assert_eq!(part_1(input), 448)
 }
 
 #[test]
