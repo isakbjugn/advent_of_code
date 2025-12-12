@@ -6,7 +6,7 @@ use crate::grid::Grid;
 use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
-    let grid = Grid::new(input).unwrap();
+    let grid = Grid::from_str(input).unwrap();
     let initial_beam = (Position { x: 0, y: 0 }, East);
     energize(&grid, initial_beam)
 }
@@ -98,7 +98,7 @@ impl Grid {
 }
 
 pub fn part_2(input: &str) -> usize {
-    let grid = Grid::new(input).unwrap();
+    let grid = Grid::from_str(input).unwrap();
     let mut max_energized = 0;
     for position in grid.north_perimeter() {
         let initial_beam = (position, South);

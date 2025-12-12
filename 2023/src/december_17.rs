@@ -5,12 +5,12 @@ use crate::grid::Grid;
 use crate::position::Position;
 
 pub fn part_1(input: &str) -> usize {
-    let grid = Grid::new(input).unwrap();
+    let grid = Grid::from_str(input).unwrap();
     grid.a_star_search(Crucible::Standard).unwrap()
 }
 
 pub fn part_2(input: &str) -> usize {
-    let grid = Grid::new(input).unwrap();
+    let grid = Grid::from_str(input).unwrap();
     grid.a_star_search(Crucible::Ultra).unwrap()
 }
 
@@ -61,7 +61,7 @@ impl Grid {
     }
     fn standard_crucible_directions(&self, vertex: &Vertex) -> Vec<Direction> {
         let direction = vertex.direction.unwrap();
-        let possible_directions: HashSet<Direction> = HashSet::from_iter(self.possible_directions(vertex.position));
+        let possible_directions: HashSet<Direction> = HashSet::from_iter(self.possible_directions(&vertex.position));
         let perpendicular = direction.perpendicular();
 
         let legal_directions = match vertex.straight_path {
@@ -73,7 +73,7 @@ impl Grid {
     }
     fn ultra_crucible_directions(&self, vertex: &Vertex) -> Vec<Direction> {
         let direction = vertex.direction.unwrap();
-        let possible_directions: HashSet<Direction> = HashSet::from_iter(self.possible_directions(vertex.position));
+        let possible_directions: HashSet<Direction> = HashSet::from_iter(self.possible_directions(&vertex.position));
         let perpendicular = direction.perpendicular();
 
         let legal_directions = match vertex.straight_path {

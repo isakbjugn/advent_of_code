@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use crate::grid::Grid;
 
 pub fn part_1(input: &str) -> u32 {
-    let mut grid = Grid::new(input).unwrap();
+    let mut grid = Grid::from_str(input).unwrap();
     grid.roll(Direction::North);
     grid.calculate_load()
 }
@@ -118,7 +118,7 @@ fn order_ascending(c: char) -> u32 {
 }
 
 pub fn part_2(input: &str, cycles: u32) -> u32 {
-    let mut grid = Grid::new(input).unwrap();
+    let mut grid = Grid::from_str(input).unwrap();
     let mut configurations: HashMap<Grid, u32> = HashMap::new();
     configurations.insert(grid.clone(), 0);
 
@@ -154,19 +154,19 @@ fn sample_input_part_1() {
 #[test]
 fn roll_sample_data_north() {
     let sample = include_str!("../input/sample_14.txt");
-    let mut sample_rolled_north = Grid::new(sample).unwrap();
+    let mut sample_rolled_north = Grid::from_str(sample).unwrap();
     sample_rolled_north.roll(Direction::North);
-    let expected_sample_rolled_north = Grid::new(include_str!("../input/sample_14_rolled_north.txt")).unwrap();
+    let expected_sample_rolled_north = Grid::from_str(include_str!("../input/sample_14_rolled_north.txt")).unwrap();
     assert_eq!(sample_rolled_north, expected_sample_rolled_north)
 }
 
 #[test]
 fn sample_input_part_2_rolled_north_west() {
     let sample = include_str!("../input/sample_14.txt");
-    let mut sample_cycle_1 = Grid::new(sample).unwrap();
+    let mut sample_cycle_1 = Grid::from_str(sample).unwrap();
     sample_cycle_1.roll(Direction::North);
     sample_cycle_1.roll(Direction::West);
-    let expected_sample_cycle_1 = Grid::new(include_str!("../input/sample_14_rolled_north_west.txt")).unwrap();
+    let expected_sample_cycle_1 = Grid::from_str(include_str!("../input/sample_14_rolled_north_west.txt")).unwrap();
 
     assert_eq!(sample_cycle_1, expected_sample_cycle_1)
 }
@@ -174,11 +174,11 @@ fn sample_input_part_2_rolled_north_west() {
 #[test]
 fn sample_input_part_2_rolled_north_west_south() {
     let sample = include_str!("../input/sample_14.txt");
-    let mut sample_cycle_1 = Grid::new(sample).unwrap();
+    let mut sample_cycle_1 = Grid::from_str(sample).unwrap();
     sample_cycle_1.roll(Direction::North);
     sample_cycle_1.roll(Direction::West);
     sample_cycle_1.roll(Direction::South);
-    let expected_sample_cycle_1 = Grid::new(include_str!("../input/sample_14_rolled_north_west_south.txt")).unwrap();
+    let expected_sample_cycle_1 = Grid::from_str(include_str!("../input/sample_14_rolled_north_west_south.txt")).unwrap();
 
     assert_eq!(sample_cycle_1, expected_sample_cycle_1)
 }
@@ -186,9 +186,9 @@ fn sample_input_part_2_rolled_north_west_south() {
 #[test]
 fn sample_input_part_2_cycle_1() {
     let sample = include_str!("../input/sample_14.txt");
-    let mut sample_cycle_1 = Grid::new(sample).unwrap();
+    let mut sample_cycle_1 = Grid::from_str(sample).unwrap();
     sample_cycle_1.cycle();
-    let expected_sample_cycle_1 = Grid::new(include_str!("../input/sample_14_cycle_1.txt")).unwrap();
+    let expected_sample_cycle_1 = Grid::from_str(include_str!("../input/sample_14_cycle_1.txt")).unwrap();
 
     assert_eq!(sample_cycle_1, expected_sample_cycle_1)
 }
