@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use crate::position::Position;
 
 pub fn part_1(input: &str) -> u64 {
@@ -41,14 +42,26 @@ pub fn part_2(input: &str) -> u64 {
     for top_left in &tiles {
         for bottom_right in tiles.iter().filter(|tile| tile.x > top_left.x && tile.y > top_left.y) {
             let area = (bottom_right.x - top_left.x + 1) as u64 * (bottom_right.y - top_left.y + 1) as u64;
-
-            if !edge_tiles.iter().any(|tile| is_tile_inside_area(tile, top_left, bottom_right)) {
-                areas.push(area);
-            }
+            areas.push((area, *top_left, *bottom_right));
+        }
+    }
+    for top_right in &tiles {
+        for bottom_left in tiles.iter().filter(|tile| tile.x < top_right.x && tile.y > top_right.y) {
+            let top_left = Position { x: bottom_left.x, y: top_right.y };
+            let bottom_right = Position { x: top_right.x, y: bottom_left.y };
+            let area = (top_right.x - bottom_left.x + 1) as u64 * (bottom_left.y - top_right.y + 1) as u64;
+            areas.push((area, top_left, bottom_right));
         }
     }
 
-    areas.into_iter().max().unwrap_or(0)
+    areas
+        .iter()
+        .sorted_by_key(|(area, _, _)| std::cmp::Reverse(area))
+        .find(|(_, top_left, bottom_right)| {
+            !edge_tiles.iter().any(|tile| is_tile_inside_area(tile, top_left, bottom_right))
+        })
+        .map(|(area, _, _)| *area)
+        .unwrap_or(0)
 }
 
 fn is_tile_inside_area(tile: &Position, top_left: &Position, bottom_right: &Position) -> bool {
@@ -77,5 +90,5 @@ fn sample_input_part_2() {
 #[test]
 fn input_part_2() {
     let input = include_str!("../input/input_9.txt");
-    assert_eq!(part_2(input), 0)
+    assert_eq!(part_2(input), 1470616992)
 }
