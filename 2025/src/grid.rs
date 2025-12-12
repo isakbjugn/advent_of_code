@@ -177,23 +177,6 @@ impl Grid {
         }
         new_grid
     }
-
-    pub fn place(&self, other: &Grid, position: &Position) -> Self {
-        let mut new_grid = self.clone();
-        for y in 0..other.height {
-            for x in 0..other.width {
-                let new_x = position.x + x;
-                let new_y = position.y + y;
-                if let Some(cell) = other.get(&Position { x, y }) {
-                    if cell == '.' {
-                        continue;
-                    }
-                    new_grid.set(Position { x: new_x, y: new_y }, cell);
-                }
-            }
-        }
-        new_grid
-    }
 }
 
 impl Hash for Grid {
