@@ -10,4 +10,18 @@ impl Position {
         let dy = self.y.abs_diff(rhs.y);
         dx + dy
     }
+    pub fn positions_between(&self, other: &Position) -> Vec<Position> {
+        let mut positions = Vec::new();
+        let x_start = self.x.min(other.x);
+        let x_end = self.x.max(other.x);
+        let y_start = self.y.min(other.y);
+        let y_end = self.y.max(other.y);
+
+        for x in x_start..=x_end {
+            for y in y_start..=y_end {
+                positions.push(Position { x, y });
+            }
+        }
+        positions
+    }
 }
