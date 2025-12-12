@@ -33,7 +33,7 @@ impl Grid {
         Ok(Grid { height: rows.len(), width: rows[0].len(), data: rows })
     }
     
-    pub fn _new(height: usize, width: usize, fill: char) -> Self {
+    pub fn new(height: usize, width: usize, fill: char) -> Self {
         let mut rows = Vec::new();
 
         for _ in 0..height {
@@ -54,7 +54,7 @@ impl Grid {
     
     pub fn height(&self) -> usize { self.height }
 
-    pub fn _width(&self) -> usize { self.width }
+    pub fn width(&self) -> usize { self.width }
     
     pub fn set(&mut self, position: Position, value: char) {
         if position.x < self.width && position.y < self.height {
@@ -154,6 +154,28 @@ impl Grid {
     
     pub fn _are_neighbors(&self, a: &Position, b: &Position) -> bool {
         self.neighbor_iter(a).contains(b)
+    }
+
+    pub fn get_rotations(&self) -> Vec<Grid> {
+        let mut current_grid = self.clone();
+        let mut rotations = vec![current_grid.clone()];
+        for _ in 0..3 {
+            current_grid = current_grid.clockwise_rotate();
+            rotations.push(current_grid.clone());
+        }
+        rotations
+    }
+
+    pub fn clockwise_rotate(&self) -> Grid {
+        let mut new_grid = Grid::new(self.width, self.height, ' ');
+        for y in 0..self.height {
+            for x in 0..self.width {
+                let new_x = self.height - 1 - y;
+                let new_y = x;
+                new_grid.set(Position { x: new_x, y: new_y }, self.data[y][x]);
+            }
+        }
+        new_grid
     }
 }
 
