@@ -25,7 +25,7 @@ fn energize(grid: &Grid, initial_beam: (Position, Direction)) -> usize {
                 visited.insert(beam);
                 match grid.next_directions(beam.0, beam.1) {
                     (Some(direction_1), Some(direction_2)) => {
-                        match (grid.neighbor_in_direction_from_position(beam.0, direction_1), grid.neighbor_in_direction_from_position(beam.0, direction_2)) {
+                        match (grid.next_position(&beam.0, direction_1), grid.next_position(&beam.0, direction_2)) {
                             (Some(next_position_1), Some(next_position_2)) => {
                                 beam = (next_position_1, direction_1);
                                 beams.push((next_position_2, direction_2));
@@ -42,7 +42,7 @@ fn energize(grid: &Grid, initial_beam: (Position, Direction)) -> usize {
                         }
                     }
                     (Some(direction), None) => {
-                        match grid.neighbor_in_direction_from_position(beam.0, direction) {
+                        match grid.next_position(&beam.0, direction) {
                             Some(position) => beam = (position, direction),
                             None => break
                         }

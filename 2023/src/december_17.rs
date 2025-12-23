@@ -119,7 +119,7 @@ impl Grid {
             distances.insert(vertex.clone(), cost);
 
             for direction in self.crucible_directions(&vertex, crucible) {
-                if let Some(neighbor) = self.neighbor_in_direction_from_position(vertex.position, direction) {
+                if let Some(neighbor) = self.next_position(&vertex.position, direction) {
                     let new_cost = cost + self.data[neighbor.y][neighbor.x].to_digit(10).unwrap() as usize;
                     let estimated_total_cost = new_cost + self.manhattan_distance(neighbor);
                     let new_vertex = Vertex {

@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use crate::direction::Direction;
@@ -33,37 +32,8 @@ impl Grid {
         Ok(Grid { height: rows.len(), width: rows[0].len(), data: rows })
     }
 
-    pub fn new(height: usize, width: usize, fill: char) -> Self {
-        let mut rows = Vec::new();
-
-        for _ in 0..height {
-            let row: Vec<char> = vec![fill; width];
-            rows.push(row);
-        }
-
-        Grid { height: rows.len(), width: rows[0].len(), data: rows }
-    }
-
     pub fn get(&self, x: usize, y: usize) -> Option<char> {
         self.data.get(y).and_then(|row| row.get(x).copied())
-    }
-
-    pub fn set(&mut self, position: Position, value: char) {
-        if position.x < self.width && position.y < self.height {
-            self.data[position.y][position.x] = value;
-        } else {
-            println!("Trying to set position {:?}, but grid is {}x{}", position, self.width, self.height);
-            panic!("Trying to set value outside grid!")
-        }
-    }
-
-    pub fn neighbor_iter<'a>(&'a self, position: &'a Position) -> impl Iterator<Item = Position> + 'a {
-        self.possible_directions(position)
-            .into_iter()
-            .map(|possible_direction|
-                self.next_position(position, possible_direction)
-                    .expect("Should be valid position in possible_direction")
-            )
     }
 
     pub fn next_position(&self, position: &Position, direction: Direction) -> Option<Position> {
@@ -75,11 +45,6 @@ impl Grid {
             Direction::West if x > 0 => Some(Position { x: x - 1, y }),
             _ => None,
         }
-    }
-
-    pub fn neighbor_in_direction_from_position(&self, position: Position, direction: Direction) -> Option<Position> {
-        // use the existing neighbor_in_direction implementation
-        self.next_position(&position, direction)
     }
 
     pub fn possible_directions(&self, position: &Position) -> Vec<Direction> {
@@ -97,43 +62,6 @@ impl Grid {
             directions.push(Direction::West);
         }
         directions
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = (Position, char)> + '_ {
-        self.data.iter().enumerate().flat_map(move |(row_index, row)| {
-            row.iter().enumerate().map(move |(col_index, &value)| {
-                (Position { x: col_index, y: row_index }, value)
-            })
-        })
-    }
-
-    pub fn find_iterator(&self, c: char) -> impl Iterator<Item = Position> + '_ {
-        self.iter()
-            .filter(move |&(_, value)| value == c)
-            .map(|(position, _)| position)
-    }
-
-    pub fn get_interior_positions(&self, position_inside: &Position) -> Vec<Position> {
-        let interior_char = match self.get(position_inside.x, position_inside.y) {
-            Some(c) => c,
-            None => return Vec::new(), // Return empty if the position is out of bounds
-        };
-        let mut interior_positions = Vec::new();
-        
-        let mut visited = VecDeque::new();
-        
-        visited.push_back(*position_inside);
-        interior_positions.push(*position_inside);
-        
-        while let Some(current_position) = visited.pop_front() {
-            for neighbor in self.neighbor_iter(&current_position) {
-                if self.get(neighbor.x, neighbor.y) == Some(interior_char) && !interior_positions.contains(&neighbor) {
-                    interior_positions.push(neighbor);
-                    visited.push_back(neighbor);
-                }
-            }
-        }
-        interior_positions
     }
 }
 
